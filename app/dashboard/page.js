@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
-import ProtectedRoute from "../../components/auth/ProtectedRoute";
-import DashboardSidebar from "../../components/layout/DashboardSidebar";
+import CustomerShell from "../../components/layout/CustomerShell";
+import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
@@ -32,39 +32,28 @@ export default function DashboardPage() {
   const primaryVehicle = vehicles[0] || {};
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Navigation */}
-            <DashboardSidebar />
+    <CustomerShell>
+      <PageHeader
+        title={`Welcome, ${user?.name || "Customer"}`}
+        description="Your vehicle telemetry, diagnostic health scores, and service schedules are up to date."
+        badge={
+          <Badge variant="blue" size="sm" dot>
+            Active Garage
+          </Badge>
+        }
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Dashboard" },
+        ]}
+        actions={
+          <Link href="/services">
+            <Button variant="primary" size="sm" leftIcon={Plus}>
+              Book Service
+            </Button>
+          </Link>
+        }
+      />
 
-            {/* Main Dashboard Space */}
-            <div className="flex-1 space-y-8">
-              {/* TOP GREETING & ACTION HEADER */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2.5">
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                      Good morning, {user?.name || "Customer"} 👋
-                    </h1>
-                    <Badge variant="blue" size="sm" dot>
-                      Active Garage
-                    </Badge>
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                    Your vehicle telemetry, diagnostic health scores, and service schedules are up to date.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Link href="/services">
-                    <Button variant="primary" size="md" leftIcon={Plus}>
-                      Book Service
-                    </Button>
-                  </Link>
-                </div>
-              </div>
 
               {/* ACTIVE VEHICLE HEALTH & SPECS CARD */}
               <Card className="overflow-hidden">
@@ -242,10 +231,6 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
+    </CustomerShell>
   );
 }

@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authApi } from "../../lib/auth";
 import { useToast } from "../../context/ToastContext";
-import { validatePassword, getPasswordStrength } from "../../lib/validation";
+import { validatePassword } from "../../lib/validation";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import PasswordInput from "../../components/ui/PasswordInput";
+import Alert from "../../components/ui/Alert";
 import { Card, CardContent } from "../../components/ui/Card";
-import { Lock, CheckCircle2, AlertCircle, KeyRound, ArrowRight } from "lucide-react";
+import { Car, KeyRound, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -26,25 +28,19 @@ function ResetPasswordContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  useEffect(() => {
-    if (tokenFromUrl) {
-      setResetToken(tokenFromUrl);
-    }
-  }, [tokenFromUrl]);
-
-  const passwordStrength = getPasswordStrength(newPassword);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError("");
 
     const newErrors = {};
     if (!resetToken || !resetToken.trim()) {
-      newErrors.resetToken = "Reset token is required";
+      newErrors.resetToken = "Password reset token is required";
     }
 
     const passErr = validatePassword(newPassword);
-    if (passErr) newErrors.newPassword = passErr;
+    if (passErr) {
+      newErrors.newPassword = passErr;
+    }
 
     if (newPassword !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
@@ -63,10 +59,10 @@ function ResetPasswordContent() {
       });
 
       setIsSuccess(true);
-      toast.success("Password reset successfully! Please sign in with your new password.");
+      toast.success("Password reset successfully! You can now sign in.");
     } catch (err) {
       setServerError(
-        err.message || "Failed to reset password. The reset link may be invalid or expired."
+        err.message || "Invalid or expired reset token. Please request a new link."
       );
     } finally {
       setIsSubmitting(false);
@@ -74,58 +70,68 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-140px)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900 text-white shadow-sm mb-2">
-          <KeyRound className="w-6 h-6 text-white" />
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8 bg-slate-50/60">
+      <div className="w-full max-w-md space-y-6">
+        {/* Brand Header */}
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-1 group">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-2xs group-hover:bg-blue-600 transition-colors">
+              <Car className="w-5 h-5 text-white" aria-hidden="true" />
+            </div>
+            <span className="text-xl font-extrabold text-slate-900 tracking-tight">
+              AutoCare <span className="text-blue-600">PRO</span>
+            </span>
+          </Link>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Create new password
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Set a new secure password to restore access to your account.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Create New Password
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-          Please choose a strong, unique password to protect your vehicles and account data.
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <Card className="shadow-sm border border-slate-200">
-          <CardContent className="p-6 sm:p-8 space-y-6">
+        {/* Card */}
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="p-6 sm:p-8 space-y-5">
             {isSuccess ? (
-              <div className="text-center space-y-4">
+              <div className="space-y-5 text-center">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-6 h-6" />
+                  <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
                 </div>
+
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-slate-900">
-                    Password Successfully Updated
+                    Password Reset Complete
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Your password has been changed and all previous sessions have been secured.
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Your password has been updated securely. All previous active sessions have been invalidated.
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
-                  <Link href="/login">
-                    <Button variant="primary" size="lg" className="w-full" rightIcon={ArrowRight}>
+                <div className="pt-2">
+                  <Link href="/login" className="w-full block">
+                    <Button variant="primary" size="md" fullWidth rightIcon={ArrowRight}>
                       Sign In with New Password
                     </Button>
                   </Link>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 {serverError && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                    <span>{serverError}</span>
-                  </div>
+                  <Alert
+                    variant="error"
+                    onClose={() => setServerError("")}
+                  >
+                    {serverError}
+                  </Alert>
                 )}
 
                 <Input
                   label="Reset Token"
                   id="resetToken"
                   type="text"
-                  placeholder="Paste reset token"
+                  placeholder="Paste your reset token here"
                   value={resetToken}
                   onChange={(e) => {
                     setResetToken(e.target.value);
@@ -134,69 +140,65 @@ function ResetPasswordContent() {
                   error={errors.resetToken}
                   required
                   disabled={isSubmitting}
+                  leftIcon={KeyRound}
+                  helperText="Enter the token received via email or recovery screen."
                 />
 
-                <div className="space-y-1.5">
-                  <Input
-                    label="New Password"
-                    id="newPassword"
-                    type="password"
-                    placeholder="Min. 8 characters"
-                    value={newPassword}
-                    onChange={(e) => {
-                      setNewPassword(e.target.value);
-                      if (errors.newPassword) setErrors((prev) => ({ ...prev, newPassword: null }));
-                    }}
-                    error={errors.newPassword}
-                    leftIcon={Lock}
-                    required
-                    disabled={isSubmitting}
-                  />
-                  {newPassword && (
-                    <div className="pt-1">
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full transition-all duration-300 ${passwordStrength.color}`}
-                          style={{ width: `${passwordStrength.score}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-[10px] mt-1 text-slate-400">
-                        <span>Strength:</span>
-                        <span className={`font-semibold ${passwordStrength.text}`}>
-                          {passwordStrength.label}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <PasswordInput
+                  label="New Password"
+                  id="newPassword"
+                  placeholder="At least 8 characters"
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    if (errors.newPassword) setErrors((prev) => ({ ...prev, newPassword: null }));
+                  }}
+                  error={errors.newPassword}
+                  required
+                  disabled={isSubmitting}
+                  showStrengthMeter={true}
+                  autoComplete="new-password"
+                />
 
-                <Input
+                <PasswordInput
                   label="Confirm New Password"
                   id="confirmPassword"
-                  type="password"
-                  placeholder="Repeat new password"
+                  placeholder="Re-enter new password"
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
                     if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: null }));
                   }}
                   error={errors.confirmPassword}
-                  leftIcon={Lock}
                   required
                   disabled={isSubmitting}
+                  autoComplete="new-password"
                 />
 
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="w-full mt-2"
-                  isLoading={isSubmitting}
-                >
-                  Save New Password
-                </Button>
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    isLoading={isSubmitting}
+                    disabled={isSubmitting}
+                  >
+                    Reset Password
+                  </Button>
+                </div>
               </form>
             )}
+
+            <div className="pt-4 border-t border-slate-100 text-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Return to Sign In</span>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -208,8 +210,8 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[50vh] flex items-center justify-center text-xs text-slate-400">
-          Loading reset security session...
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50">
+          <div className="w-8 h-8 rounded-full border-2 border-slate-300 border-t-slate-900 animate-spin" />
         </div>
       }
     >
@@ -217,4 +219,3 @@ export default function ResetPasswordPage() {
     </Suspense>
   );
 }
-

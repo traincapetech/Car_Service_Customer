@@ -58,7 +58,7 @@ export default function WorkshopDashboard() {
         {/* Today's Bookings */}
         <div className="p-6 rounded-3xl bg-[#0f1624] border border-white/10 space-y-2 shadow-xl hover:border-sky-500/30 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today's Bookings</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today&apos;s Bookings</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">
               {kpis.todayBookings.change}
             </span>
@@ -102,7 +102,7 @@ export default function WorkshopDashboard() {
         {/* Today's Revenue */}
         <div className="p-6 rounded-3xl bg-[#0f1624] border border-white/10 space-y-2 shadow-xl hover:border-emerald-500/30 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today's Revenue</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today&apos;s Revenue</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">
               {kpis.todayRevenue.percent}% Target
             </span>

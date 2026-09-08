@@ -6,8 +6,9 @@ import { authApi } from "../../lib/auth";
 import { validateEmail } from "../../lib/validation";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import Alert from "../../components/ui/Alert";
 import { Card, CardContent } from "../../components/ui/Card";
-import { Car, Mail, ArrowLeft, CheckCircle2, AlertCircle, KeyRound } from "lucide-react";
+import { Car, Mail, ArrowLeft, CheckCircle2, KeyRound, Copy, Check, ArrowRight } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [devToken, setDevToken] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,112 +36,172 @@ export default function ForgotPasswordPage() {
         setDevToken(res.data);
       }
     } catch (err) {
-      setError(err.message || "Unable to process request. Please try again.");
+      setError(err.message || "Unable to process password reset. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="min-h-[calc(100vh-140px)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900 text-white shadow-sm mb-2">
-          <KeyRound className="w-6 h-6 text-white" />
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Reset Your Password
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-          Enter your registered email address and we will assist you in regaining access to your garage.
-        </p>
-      </div>
+  const handleCopyToken = () => {
+    if (!devToken) return;
+    navigator.clipboard.writeText(devToken);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <Card className="shadow-sm border border-slate-200">
-          <CardContent className="p-6 sm:p-8 space-y-6">
+  return (
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8 bg-slate-50/60">
+      <div className="w-full max-w-md space-y-6">
+        {/* Brand Header */}
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-1 group">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-2xs group-hover:bg-blue-600 transition-colors">
+              <Car className="w-5 h-5 text-white" aria-hidden="true" />
+            </div>
+            <span className="text-xl font-extrabold text-slate-900 tracking-tight">
+              AutoCare <span className="text-blue-600">PRO</span>
+            </span>
+          </Link>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Reset your password
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Enter your registered email address to receive password reset instructions.
+          </p>
+        </div>
+
+        {/* Card */}
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="p-6 sm:p-8 space-y-5">
             {isSubmitted ? (
-              <div className="space-y-4 text-center">
+              <div className="space-y-5 text-center">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-6 h-6" />
+                  <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
                 </div>
+
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-slate-900">
-                    Request Received
+                    Reset Instructions Sent
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    If an account is registered with <strong className="text-slate-800">{email}</strong>, a password reset request has been initiated.
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    If an active account exists for <span className="font-semibold text-slate-900">{email}</span>, a secure password reset token has been generated.
                   </p>
                 </div>
 
+                {/* Development helper card */}
                 {devToken && (
-                  <div className="p-3.5 bg-blue-50 rounded-xl border border-blue-200 text-left space-y-2 text-xs">
-                    <p className="font-bold text-blue-900">Local Development Notice:</p>
-                    <p className="text-slate-600 break-all text-[11px] font-mono bg-white p-2 rounded border border-blue-100">
+                  <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 text-left space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wide">
+                        Development Reset Token
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleCopyToken}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 hover:text-blue-900 focus:outline-none"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span className="text-emerald-700">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="p-2 rounded-lg bg-white border border-blue-200/80 font-mono text-xs text-slate-800 break-all select-all">
                       {devToken}
-                    </p>
+                    </div>
+
                     <Link
-                      href={`/reset-password?token=${devToken}`}
-                      className="inline-block text-xs font-bold text-blue-700 hover:text-blue-800 underline"
+                      href={`/reset-password?token=${encodeURIComponent(devToken)}`}
+                      className="w-full block"
                     >
-                      Proceed to Reset Password with this Token →
+                      <Button
+                        variant="blue"
+                        size="sm"
+                        fullWidth
+                        rightIcon={ArrowRight}
+                      >
+                        Proceed to Reset Password
+                      </Button>
                     </Link>
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-slate-100">
-                  <Link href="/login">
-                    <Button variant="outline" size="md" className="w-full">
-                      Return to Sign In
+                <div className="pt-2 flex flex-col gap-2">
+                  <Link href={`/reset-password`}>
+                    <Button variant="outline" size="sm" fullWidth>
+                      Enter Reset Token Manually
                     </Button>
                   </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      setDevToken(null);
+                    }}
+                    className="text-xs text-slate-500 hover:text-slate-900 py-1"
+                  >
+                    Try another email address
+                  </button>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 {error && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                    <span>{error}</span>
-                  </div>
+                  <Alert variant="error" onClose={() => setError("")}>
+                    {error}
+                  </Alert>
                 )}
 
                 <Input
                   label="Registered Email Address"
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder="you@example.com"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (error) setError("");
                   }}
-                  leftIcon={Mail}
                   required
-                  autoComplete="email"
                   disabled={isSubmitting}
+                  autoComplete="email"
+                  leftIcon={Mail}
+                  helperText="We will look up your account and generate a recovery token."
                 />
 
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="w-full"
-                  isLoading={isSubmitting}
-                >
-                  Send Reset Link
-                </Button>
-
-                <div className="pt-4 border-t border-slate-100 text-center">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    isLoading={isSubmitting}
+                    disabled={isSubmitting}
                   >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back to Sign In</span>
-                  </Link>
+                    Request Password Reset
+                  </Button>
                 </div>
               </form>
             )}
+
+            <div className="pt-4 border-t border-slate-100 text-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Return to Sign In</span>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>

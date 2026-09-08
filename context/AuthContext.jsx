@@ -5,7 +5,6 @@ import { authApi } from "../lib/auth";
 import {
   getAccessToken,
   getRefreshToken,
-  getStoredUser,
   setTokens,
   setStoredUser,
   clearTokens,
@@ -17,9 +16,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize session from tokens
-  const initializeAuth = useCallback(async () => {
-    setIsLoading(true);
+  const fetchCurrentUser = useCallback(async () => {
     const token = getAccessToken();
     const refreshToken = getRefreshToken();
 
@@ -38,8 +35,7 @@ export function AuthProvider({ children }) {
         clearTokens();
         setUser(null);
       }
-    } catch (err) {
-      // If /me fails and refresh token rotation in api.js fails, user is logged out
+    } catch {
       clearTokens();
       setUser(null);
     } finally {
@@ -48,7 +44,44 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    initializeAuth();
+    let ignore = false;
+
+    async function loadAuth() {
+      const token = getAccessToken();
+      const refreshToken = getRefreshToken();
+
+      if (!token && !refreshToken) {
+        if (!ignore) {
+          setUser(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await authApi.getCurrentUser();
+        if (!ignore) {
+          if (response && response.success && response.data) {
+            setUser(response.data);
+            setStoredUser(response.data);
+          } else {
+            clearTokens();
+            setUser(null);
+          }
+        }
+      } catch {
+        if (!ignore) {
+          clearTokens();
+          setUser(null);
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadAuth();
 
     // Listen for global session expiry events triggered by api.js
     const handleSessionExpired = () => {
@@ -58,9 +91,10 @@ export function AuthProvider({ children }) {
 
     window.addEventListener("autocare:session-expired", handleSessionExpired);
     return () => {
+      ignore = true;
       window.removeEventListener("autocare:session-expired", handleSessionExpired);
     };
-  }, [initializeAuth]);
+  }, []);
 
   // Login
   const login = async (email, password) => {
@@ -144,7 +178,7 @@ export function AuthProvider({ children }) {
     updateProfile,
     changePassword,
     deactivateAccount,
-    refreshUser: initializeAuth,
+    refreshUser: fetchCurrentUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

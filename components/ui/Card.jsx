@@ -3,7 +3,7 @@ import React from "react";
 export function Card({ children, className = "", hover = false, ...props }) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/90 shadow-sm transition-all duration-200 ${
+      className={`bg-white rounded-2xl border border-slate-200/85 shadow-xs transition-all duration-200 ${
         hover ? "hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5" : ""
       } ${className}`}
       {...props}
@@ -15,7 +15,7 @@ export function Card({ children, className = "", hover = false, ...props }) {
 
 export function CardHeader({ children, className = "", ...props }) {
   return (
-    <div className={`p-6 pb-4 border-b border-slate-100 ${className}`} {...props}>
+    <div className={`p-5 sm:p-6 pb-4 border-b border-slate-100 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -39,7 +39,7 @@ export function CardDescription({ children, className = "", ...props }) {
 
 export function CardContent({ children, className = "", ...props }) {
   return (
-    <div className={`p-6 ${className}`} {...props}>
+    <div className={`p-5 sm:p-6 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -47,7 +47,7 @@ export function CardContent({ children, className = "", ...props }) {
 
 export function CardFooter({ children, className = "", ...props }) {
   return (
-    <div className={`p-6 pt-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl ${className}`} {...props}>
+    <div className={`p-5 sm:p-6 pt-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex items-center justify-between gap-3 ${className}`} {...props}>
       {children}
     </div>
   );

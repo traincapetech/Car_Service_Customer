@@ -9,12 +9,13 @@ import {
   validateEmail,
   validateIndianPhone,
   validatePassword,
-  getPasswordStrength,
 } from "../../lib/validation";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import PasswordInput from "../../components/ui/PasswordInput";
+import Alert from "../../components/ui/Alert";
 import { Card, CardContent } from "../../components/ui/Card";
-import { Car, Lock, Mail, User, Phone, ShieldCheck, AlertCircle } from "lucide-react";
+import { Car, User, Mail, Phone, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -33,8 +34,6 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const passwordStrength = getPasswordStrength(formData.password);
 
   const handleChange = (e) => {
     const { id, value, type, checked } = e.target;
@@ -58,7 +57,7 @@ export default function RegisterPage() {
     const newErrors = {};
 
     if (!formData.name || formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+      newErrors.name = "Full name must be at least 2 characters";
     }
 
     const emailErr = validateEmail(formData.email);
@@ -75,7 +74,7 @@ export default function RegisterPage() {
     }
 
     if (!formData.agreeTerms) {
-      newErrors.agreeTerms = "You must agree to the Terms and Privacy Policy";
+      newErrors.agreeTerms = "You must accept the Terms of Service to continue";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -92,58 +91,67 @@ export default function RegisterPage() {
         password: formData.password,
       });
 
-      toast.success("Account created successfully! Welcome to AutoCare Pro.");
+      toast.success("Account registered successfully! Welcome to AutoCare Pro.");
       router.push("/dashboard");
     } catch (err) {
-      if (err.fieldErrors) {
+      // If backend validation returns field-specific errors
+      if (err.fieldErrors && typeof err.fieldErrors === "object") {
         setErrors(err.fieldErrors);
-      } else {
-        setServerError(
-          err.message || "Failed to create account. Please check your information."
-        );
       }
+      setServerError(
+        err.message || "Unable to complete registration. Please check your information and try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-140px)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900 text-white shadow-sm mb-2">
-          <Car className="w-6 h-6 text-white" />
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8 bg-slate-50/60">
+      <div className="w-full max-w-lg space-y-6">
+        {/* Brand Header */}
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-1 group">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-2xs group-hover:bg-blue-600 transition-colors">
+              <Car className="w-5 h-5 text-white" aria-hidden="true" />
+            </div>
+            <span className="text-xl font-extrabold text-slate-900 tracking-tight">
+              AutoCare <span className="text-blue-600">PRO</span>
+            </span>
+          </Link>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Create your customer account
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Join thousands of car owners experiencing transparent, digital-first vehicle care.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Create Customer Account
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-          Join thousands of vehicle owners experiencing effortless maintenance, genuine OEM parts, and digital service records.
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0">
-        <Card className="shadow-sm border border-slate-200">
-          <CardContent className="p-6 sm:p-8 space-y-6">
+        {/* Form Card */}
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="p-6 sm:p-8 space-y-5">
             {serverError && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-150">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <span className="leading-relaxed">{serverError}</span>
-              </div>
+              <Alert
+                variant="error"
+                onClose={() => setServerError("")}
+              >
+                {serverError}
+              </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <Input
                 label="Full Name"
                 id="name"
                 type="text"
-                placeholder="e.g. Rahul Verma"
+                placeholder="Rahul Sharma"
                 value={formData.name}
                 onChange={handleChange}
                 error={errors.name}
-                leftIcon={User}
                 required
-                autoComplete="name"
                 disabled={isSubmitting}
+                autoComplete="name"
+                leftIcon={User}
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -155,125 +163,135 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleChange}
                   error={errors.email}
-                  leftIcon={Mail}
                   required
-                  autoComplete="email"
                   disabled={isSubmitting}
+                  autoComplete="email"
+                  leftIcon={Mail}
                 />
 
                 <Input
-                  label="10-Digit Mobile"
+                  label="Phone Number"
                   id="phone"
                   type="tel"
                   placeholder="9876543210"
                   value={formData.phone}
                   onChange={handleChange}
                   error={errors.phone}
-                  leftIcon={Phone}
+                  helperText="10-digit Indian mobile number"
                   required
+                  disabled={isSubmitting}
                   autoComplete="tel"
-                  disabled={isSubmitting}
+                  leftIcon={Phone}
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Input
-                    label="Password"
-                    id="password"
-                    type="password"
-                    placeholder="Min. 8 chars"
-                    value={formData.password}
-                    onChange={handleChange}
-                    error={errors.password}
-                    leftIcon={Lock}
-                    required
-                    autoComplete="new-password"
-                    disabled={isSubmitting}
-                  />
-                  {formData.password && (
-                    <div className="pt-1">
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full transition-all duration-300 ${passwordStrength.color}`}
-                          style={{ width: `${passwordStrength.score}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-[10px] mt-1 text-slate-400">
-                        <span>Strength:</span>
-                        <span className={`font-semibold ${passwordStrength.text}`}>
-                          {passwordStrength.label}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <PasswordInput
+                label="Password"
+                id="password"
+                placeholder="Create a strong password"
+                value={formData.password}
+                onChange={handleChange}
+                error={errors.password}
+                required
+                disabled={isSubmitting}
+                showStrengthMeter={true}
+                autoComplete="new-password"
+              />
 
-                <Input
-                  label="Confirm Password"
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Repeat password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  error={errors.confirmPassword}
-                  leftIcon={Lock}
-                  required
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                />
-              </div>
+              <PasswordInput
+                label="Confirm Password"
+                id="confirmPassword"
+                placeholder="Re-enter your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={errors.confirmPassword}
+                required
+                disabled={isSubmitting}
+                autoComplete="new-password"
+              />
 
-              <div className="pt-2">
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600">
+              {/* Terms Checkbox */}
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     id="agreeTerms"
                     type="checkbox"
                     checked={formData.agreeTerms}
                     onChange={handleChange}
                     disabled={isSubmitting}
-                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 w-4 h-4 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 transition-colors"
                   />
-                  <span>
+                  <span className="text-xs text-slate-600 leading-normal">
                     I agree to the{" "}
-                    <span className="font-semibold text-slate-900 underline">Terms of Service</span>{" "}
+                    <span className="font-semibold text-slate-900 underline underline-offset-2">
+                      Terms of Service
+                    </span>{" "}
                     and{" "}
-                    <span className="font-semibold text-slate-900 underline">Privacy Policy</span>.
+                    <span className="font-semibold text-slate-900 underline underline-offset-2">
+                      Privacy Policy
+                    </span>
+                    .
                   </span>
                 </label>
                 {errors.agreeTerms && (
-                  <p className="text-[11px] text-rose-600 mt-1">{errors.agreeTerms}</p>
+                  <p className="text-xs text-rose-600 font-medium mt-1">
+                    {errors.agreeTerms}
+                  </p>
                 )}
               </div>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full mt-2"
-                isLoading={isSubmitting}
-              >
-                Create Account
-              </Button>
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  isLoading={isSubmitting}
+                  disabled={isSubmitting}
+                >
+                  Create Account
+                </Button>
+              </div>
             </form>
 
             <div className="pt-4 border-t border-slate-100 text-center">
               <p className="text-xs text-slate-500">
-                Already registered?{" "}
+                Already have an account?{" "}
                 <Link
                   href="/login"
-                  className="font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                  className="font-bold text-slate-900 hover:text-blue-600 transition-colors underline-offset-4 hover:underline"
                 >
-                  Sign In instead
+                  Sign in instead
                 </Link>
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-slate-400 text-xs">
-          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Your data is protected under ISO 27001 Security Standards</span>
+        {/* Benefits list */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+            <ShieldCheck className="w-4 h-4 text-blue-600" aria-hidden="true" />
+            <span>Customer Membership Benefits</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-500">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" aria-hidden="true" />
+              <span>Digital service logs & invoices</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" aria-hidden="true" />
+              <span>Up to 6-month OEM warranty</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" aria-hidden="true" />
+              <span>Free doorstep vehicle pickup</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" aria-hidden="true" />
+              <span>Live stage telemetry updates</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
