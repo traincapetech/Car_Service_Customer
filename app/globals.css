@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #070a0f;
-  --foreground: #f3f4f6;
-  --surface-card: #0f1623;
-  --surface-hover: #162032;
-  --accent-lime: #10b981;
-  --accent-cyan: #38bdf8;
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface-card: #ffffff;
+  --surface-muted: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --brand-primary: #0f172a;
+  --brand-blue: #2563eb;
+  --brand-amber: #f59e0b;
+  --brand-emerald: #059669;
 }
 
 body {
@@ -15,57 +18,68 @@ body {
   color: var(--foreground);
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar */
+/* Custom Clean Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #070a0f;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
 
-/* Neon Glow & Luxury Shadows */
-.glow-lime {
-  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35);
-}
-.glow-lime-sm {
-  box-shadow: 0 0 12px -2px rgba(16, 185, 129, 0.3);
-}
-.glow-cyan {
-  box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.35);
+/* Polished Card Surface */
+.card-surface {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.border-glow-lime {
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.25);
+.card-hover:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  transform: translateY(-2px);
 }
 
-/* Glassmorphism Card Style */
-.glass-panel {
-  background: rgba(15, 22, 35, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+/* Precision Focus Ring */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.glass-panel-elevated {
-  background: linear-gradient(135deg, rgba(22, 32, 50, 0.85) 0%, rgba(12, 18, 28, 0.95) 100%);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+/* Subtle Shimmer Animation for Skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-/* Pulse Beacon Animation */
+.animate-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Pulse Beacon */
 @keyframes beacon-ping {
   0% {
     transform: scale(0.95);
@@ -73,7 +87,7 @@ body {
   }
   50% {
     transform: scale(1.4);
-    opacity: 0.3;
+    opacity: 0.2;
   }
   100% {
     transform: scale(0.95);
