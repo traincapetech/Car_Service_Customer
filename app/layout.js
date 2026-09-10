@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "AutoCare Pro | Premium Automotive Service & Management Platform",
+  title: "Addior Mechanics Pro | Premium Automotive Service & Management Platform",
   description: "Enterprise car care platform. Smart service scheduling, guaranteed genuine OEM parts, certified master mechanics, and live transparent telemetry.",
 };
 

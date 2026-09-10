@@ -59,7 +59,7 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
       {/* PAGE HEADER */}
       <div className="text-center space-y-2">
         <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
-          AutoCare Pro Service Booking
+          Addior Mechanics Pro Service Booking
         </span>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           Schedule Service in 4 Simple Steps
@@ -81,22 +81,20 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                 onClick={() => {
                   if (s.num < step) setStep(s.num);
                 }}
-                className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
-                  isCurrent
+                className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isCurrent
                     ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400 shadow-md"
                     : isDone
-                    ? "bg-white/[0.03] border-emerald-500/20 text-slate-300 cursor-pointer"
-                    : "bg-white/[0.01] border-white/5 text-slate-500"
-                }`}
+                      ? "bg-white/[0.03] border-emerald-500/20 text-slate-300 cursor-pointer"
+                      : "bg-white/[0.01] border-white/5 text-slate-500"
+                  }`}
               >
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${
-                    isCurrent
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${isCurrent
                       ? "bg-emerald-500 text-slate-950 glow-lime-sm"
                       : isDone
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-slate-800 text-slate-400"
-                  }`}
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : "bg-slate-800 text-slate-400"
+                    }`}
                 >
                   {isDone ? <Check className="w-4 h-4" /> : `0${s.num}`}
                 </div>
@@ -125,11 +123,10 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                 <div
                   key={v.id}
                   onClick={() => setSelectedVehicle(v)}
-                  className={`cursor-pointer p-5 rounded-3xl border transition-all flex items-center justify-between gap-4 ${
-                    isSelected
+                  className={`cursor-pointer p-5 rounded-3xl border transition-all flex items-center justify-between gap-4 ${isSelected
                       ? "bg-gradient-to-r from-emerald-950/40 to-slate-900 border-emerald-500/50 shadow-xl glow-lime-sm"
                       : "bg-[#0f1624] border-white/10 hover:border-white/20"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-4">
                     <img
@@ -145,9 +142,8 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                   </div>
 
                   <div
-                    className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-                      isSelected ? "border-emerald-500 bg-emerald-500 text-slate-950" : "border-slate-600"
-                    }`}
+                    className={`w-6 h-6 rounded-full border flex items-center justify-center ${isSelected ? "border-emerald-500 bg-emerald-500 text-slate-950" : "border-slate-600"
+                      }`}
                   >
                     {isSelected && <Check className="w-3.5 h-3.5" />}
                   </div>
@@ -183,11 +179,10 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                 <div
                   key={pkg.id}
                   onClick={() => setSelectedService(pkg)}
-                  className={`cursor-pointer p-6 rounded-3xl border transition-all space-y-4 flex flex-col justify-between ${
-                    isSelected
+                  className={`cursor-pointer p-6 rounded-3xl border transition-all space-y-4 flex flex-col justify-between ${isSelected
                       ? "bg-gradient-to-br from-emerald-950/50 via-[#0f1624] to-slate-900 border-emerald-500 shadow-xl glow-lime-sm"
                       : "bg-[#0f1624] border-white/10 hover:border-white/20"
-                  }`}
+                    }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -217,11 +212,10 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                       ₹{pkg.price.toLocaleString("en-IN")}
                     </span>
                     <span
-                      className={`text-xs font-bold px-3 py-1.5 rounded-xl border ${
-                        isSelected
+                      className={`text-xs font-bold px-3 py-1.5 rounded-xl border ${isSelected
                           ? "bg-emerald-500 text-slate-950 border-emerald-500"
                           : "bg-white/5 text-slate-300 border-white/10"
-                      }`}
+                        }`}
                     >
                       {isSelected ? "Selected" : "Select Package"}
                     </span>
@@ -271,11 +265,10 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                     <div
                       key={idx}
                       onClick={() => setSelectedDate(d.full)}
-                      className={`cursor-pointer p-4 rounded-2xl border text-center transition-all ${
-                        isSelected
+                      className={`cursor-pointer p-4 rounded-2xl border text-center transition-all ${isSelected
                           ? "bg-emerald-500 text-slate-950 border-emerald-500 font-bold shadow-lg glow-lime-sm"
                           : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-300"
-                      }`}
+                        }`}
                     >
                       <span className="text-[10px] uppercase font-semibold block">{d.day}</span>
                       <span className="text-base font-extrabold block mt-0.5">{d.date}</span>
@@ -297,11 +290,10 @@ export default function BookingWizard({ vehicles, preselectedVehicle, setActiveV
                     <button
                       key={idx}
                       onClick={() => setSelectedTime(t)}
-                      className={`p-3 rounded-xl border text-xs font-mono font-bold transition-all ${
-                        isSelected
+                      className={`p-3 rounded-xl border text-xs font-mono font-bold transition-all ${isSelected
                           ? "bg-emerald-500 text-slate-950 border-emerald-500 shadow-md"
                           : "bg-white/[0.03] border-white/10 text-slate-300 hover:border-white/20"
-                      }`}
+                        }`}
                     >
                       {t}
                     </button>

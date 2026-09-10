@@ -64,7 +64,7 @@ export default function Topbar({ activeView, setActiveView, setIsMobileOpen }) {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-              AutoCare Pro
+              Addior Mechanics Pro
             </span>
             <span className="text-slate-600">/</span>
             <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">

@@ -63,7 +63,7 @@ export default function AddVehicleModal({ isOpen, onClose, onAddVehicle }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white tracking-tight">Add New Vehicle</h3>
-              <p className="text-xs text-slate-400">Register vehicle to AutoCare Pro telemetry hub</p>
+              <p className="text-xs text-slate-400">Register vehicle to Addior Mechanics Pro telemetry hub</p>
             </div>
           </div>
           <button

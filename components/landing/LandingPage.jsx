@@ -96,7 +96,7 @@ export default function LandingPage({ setActiveView }) {
             </h1>
 
             <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl font-normal">
-              AutoCare Pro connects vehicle owners, service centers, certified advisors, and enterprise administrators into one intelligent, unified automotive ecosystem.
+              Addior Mechanics Pro connects vehicle owners, service centers, certified advisors, and enterprise administrators into one intelligent, unified automotive ecosystem.
             </p>
 
             {/* CTAs */}
@@ -280,7 +280,7 @@ export default function LandingPage({ setActiveView }) {
           <div>
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Seamless Lifecycle</span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
-              How AutoCare Pro Works
+              How Addior Mechanics Pro Works
             </h2>
           </div>
           <p className="text-slate-400 text-xs sm:text-sm max-w-md">

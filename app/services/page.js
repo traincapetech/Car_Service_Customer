@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import CustomerShell from "../../components/layout/CustomerShell";
 import PageHeader from "../../components/ui/PageHeader";
 import Badge from "../../components/ui/Badge";
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 
 export default function ServicesPage() {
+  const router = useRouter();
   const toast = useToast();
 
   const [services, setServices] = useState([]);
@@ -156,7 +158,7 @@ export default function ServicesPage() {
     setDetailModalService(service);
   };
 
-  // Step 17 Preparation: Prepare selected service for booking
+  // Step 17: Navigate to booking wizard with selected service
   const handleBookService = (service) => {
     try {
       // Store selected service in sessionStorage to be consumed by Step 17 Booking Wizard
@@ -171,10 +173,8 @@ export default function ServicesPage() {
     // Close detail modal if open
     setDetailModalService(null);
 
-    // Inform user of preparation for Step 17
-    toast.success(
-      `"${service.name}" selected! Vehicle selection & appointment scheduling will continue in Step 17.`
-    );
+    // Route to booking wizard with pre-selected service
+    router.push(`/bookings/new?serviceId=${service.id}`);
   };
 
   const handleResetFilters = () => {
@@ -344,10 +344,10 @@ export default function ServicesPage() {
         />
       )}
 
-      {/* SERVICE CARDS GRID */}
+      {/* SERVICE CARDS LIST */}
       {!isLoading && !error && filteredServices.length > 0 && (
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+          className="grid grid-cols-1 xl:grid-cols-2 gap-4"
           role="region"
           aria-label="Available services"
         >

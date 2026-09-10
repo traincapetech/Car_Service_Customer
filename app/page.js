@@ -266,12 +266,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* VALUE PROPOSITION: WHY AUTOCARE PRO */}
+      {/* VALUE PROPOSITION: WHY Addior Mechanics PRO */}
       <section className="bg-slate-900 text-white py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <Badge variant="blue" size="sm" className="bg-blue-950 text-blue-300 border-blue-800">
-              The AutoCare Guarantee
+              The Addior Mechanics Guarantee
             </Badge>
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
               Engineered for Complete Peace of Mind
@@ -303,7 +303,7 @@ export default function HomePage() {
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <Badge variant="neutral" size="sm">Frictionless Experience</Badge>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            How AutoCare Pro Works
+            How Addior Mechanics Pro Works
           </h2>
           <p className="text-xs sm:text-sm text-slate-500">
             From online booking to doorstep delivery in four streamlined steps.

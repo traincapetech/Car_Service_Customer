@@ -79,7 +79,7 @@ function ResetPasswordContent() {
               <Car className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             <span className="text-xl font-extrabold text-slate-900 tracking-tight">
-              AutoCare <span className="text-blue-600">PRO</span>
+              Addior Mechanics <span className="text-blue-600">PRO</span>
             </span>
           </Link>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">

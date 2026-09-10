@@ -62,11 +62,11 @@ export default function Navbar() {
     { label: "Services", href: "/services" },
     ...(isAuthenticated
       ? [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "My Garage", href: "/garage" },
-          { label: "Live Tracking", href: "/tracking" },
-          { label: "History", href: "/history" },
-        ]
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "My Garage", href: "/garage" },
+        { label: "Live Tracking", href: "/tracking" },
+        { label: "History", href: "/history" },
+      ]
       : []),
   ];
 
@@ -81,7 +81,7 @@ export default function Navbar() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-base font-extrabold text-slate-900 tracking-tight">
-                AutoCare
+                Addior Mechanics
               </span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/80">
                 PRO
@@ -101,11 +101,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                    isActive
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
                       ? "bg-slate-100 text-slate-900 font-bold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -255,11 +254,10 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                      isActive
+                    className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${isActive
                         ? "bg-slate-100 text-slate-900 font-bold"
                         : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     {link.label}
                   </Link>
@@ -269,11 +267,10 @@ export default function Navbar() {
               {isAuthenticated && (
                 <Link
                   href="/profile"
-                  className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                    pathname === "/profile"
+                  className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${pathname === "/profile"
                       ? "bg-slate-100 text-slate-900 font-bold"
                       : "text-slate-700 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   Profile & Security
                 </Link>
@@ -329,7 +326,7 @@ export default function Navbar() {
         isOpen={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
         onConfirm={handleConfirmLogout}
-        title="Sign Out of AutoCare Pro?"
+        title="Sign Out of Addior Mechanics Pro?"
         description="Your current session will be closed on this device. You will need to sign in again to access your dashboard and garage."
         confirmLabel="Sign Out"
         confirmVariant="danger"

@@ -29,7 +29,7 @@ export default function TrackingPlaceholderPage() {
       <EmptyState
         icon={Activity}
         title="No Active Repair Job in Workshop"
-        description="When your vehicle is checked in at an authorized AutoCare Pro partner garage, its live bay telemetry and stage timeline will appear here in real time."
+        description="When your vehicle is checked in at an authorized Addior Mechanics Pro partner garage, its live bay telemetry and stage timeline will appear here in real time."
         action={
           <Link href="/services">
             <Button variant="primary" size="sm" rightIcon={ArrowRight}>

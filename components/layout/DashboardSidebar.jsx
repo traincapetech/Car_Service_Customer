@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Activity,
   ShieldCheck,
+  Calendar,
 } from "lucide-react";
 import Badge from "../ui/Badge";
 import ConfirmDialog from "../ui/ConfirmDialog";
@@ -29,6 +30,7 @@ export default function DashboardSidebar() {
     { label: "Dashboard Overview", href: "/dashboard", icon: LayoutDashboard },
     { label: "My Garage", href: "/garage", icon: Car },
     { label: "Service Catalog", href: "/services", icon: Wrench },
+    { label: "My Bookings", href: "/bookings", icon: Calendar },
     { label: "Live Tracking", href: "/tracking", icon: Activity },
     { label: "Service History", href: "/history", icon: History },
     { label: "Profile & Security", href: "/profile", icon: User },
@@ -83,25 +85,22 @@ export default function DashboardSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${isActive
                     ? "bg-slate-900 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Icon
-                    className={`w-4 h-4 shrink-0 ${
-                      isActive ? "text-white" : "text-slate-400"
-                    }`}
+                    className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-400"
+                      }`}
                     aria-hidden="true"
                   />
                   <span className="truncate">{item.label}</span>
                 </div>
                 <ChevronRight
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${
-                    isActive ? "text-white/70" : "text-slate-300"
-                  }`}
+                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${isActive ? "text-white/70" : "text-slate-300"
+                    }`}
                   aria-hidden="true"
                 />
               </Link>
@@ -127,7 +126,7 @@ export default function DashboardSidebar() {
             <span>OEM Warranty Guard</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed">
-            All services booked through AutoCare Pro include a 6-month / 10,000 km warranty.
+            All services booked through Addior Mechanics Pro include a 6-month / 10,000 km warranty.
           </p>
         </div>
       </aside>
@@ -137,7 +136,7 @@ export default function DashboardSidebar() {
         isOpen={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
         onConfirm={handleConfirmLogout}
-        title="Sign Out of AutoCare Pro?"
+        title="Sign Out of Addior Mechanics Pro?"
         description="Your current session will be closed on this device. You will need to sign in again with your credentials."
         confirmLabel="Sign Out"
         confirmVariant="danger"

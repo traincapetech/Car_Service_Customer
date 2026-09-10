@@ -89,10 +89,10 @@ export function AuthProvider({ children }) {
       clearTokens();
     };
 
-    window.addEventListener("autocare:session-expired", handleSessionExpired);
+    window.addEventListener("Addior Mechanics:session-expired", handleSessionExpired);
     return () => {
       ignore = true;
-      window.removeEventListener("autocare:session-expired", handleSessionExpired);
+      window.removeEventListener("Addior Mechanics:session-expired", handleSessionExpired);
     };
   }, []);
 

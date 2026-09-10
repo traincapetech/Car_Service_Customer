@@ -43,9 +43,8 @@ export default function Sidebar({ activeView, setActiveView, isMobileOpen, setIs
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col w-72 bg-[#090d14] border-r border-white/5 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col w-72 bg-[#090d14] border-r border-white/5 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Header / Logo */}
         <div className="flex items-center justify-between h-20 px-6 border-b border-white/5">
@@ -55,7 +54,7 @@ export default function Sidebar({ activeView, setActiveView, isMobileOpen, setIs
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold tracking-tight text-white">AutoCare</span>
+                <span className="text-lg font-bold tracking-tight text-white">Addior Mechanics</span>
                 <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                   PRO
                 </span>
@@ -86,17 +85,15 @@ export default function Sidebar({ activeView, setActiveView, isMobileOpen, setIs
               <button
                 key={item.id}
                 onClick={() => handleSelect(item.id)}
-                className={`group relative flex items-center justify-between w-full px-3.5 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
-                  isActive
+                className={`group relative flex items-center justify-between w-full px-3.5 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${isActive
                     ? "bg-gradient-to-r from-emerald-500/15 to-emerald-500/5 text-emerald-400 border border-emerald-500/30 shadow-sm"
                     : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`w-4 h-4 transition-colors ${
-                      isActive ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"
-                    }`}
+                    className={`w-4 h-4 transition-colors ${isActive ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"
+                      }`}
                   />
                   <span>{item.label}</span>
                 </div>
@@ -110,11 +107,10 @@ export default function Sidebar({ activeView, setActiveView, isMobileOpen, setIs
                   )}
                   {item.badge && (
                     <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                        item.badge === "Enterprise"
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${item.badge === "Enterprise"
                           ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
                           : "bg-white/5 text-slate-400 border border-white/10"
-                      }`}
+                        }`}
                     >
                       {item.badge}
                     </span>
@@ -134,14 +130,14 @@ export default function Sidebar({ activeView, setActiveView, isMobileOpen, setIs
         <div className="p-4 border-t border-white/5 space-y-3">
           <div className="space-y-1">
             <button
-              onClick={() => alert("AutoCare Pro Settings: All vehicle diagnostics & notifications synced.")}
+              onClick={() => alert("Addior Mechanics Pro Settings: All vehicle diagnostics & notifications synced.")}
               className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] transition-colors"
             >
               <Settings className="w-4 h-4 text-slate-500" />
               <span>System Settings</span>
             </button>
             <button
-              onClick={() => alert("Need Help? Contact AutoCare Enterprise Concierge at concierge@autocare.pro")}
+              onClick={() => alert("Need Help? Contact Addior Mechanics Enterprise Concierge at concierge@Addior Mechanics.pro")}
               className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] transition-colors"
             >
               <HelpCircle className="w-4 h-4 text-slate-500" />

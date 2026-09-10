@@ -358,7 +358,7 @@ export default function CustomerDashboard({ vehicles, activeTracking, setActiveV
                 <span className="text-slate-500 text-[10px]">26 Aug, 11:30 AM</span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Line-item estimate of ₹6,499 approved via AutoCare Pro mobile app.
+                Line-item estimate of ₹6,499 approved via Addior Mechanics Pro mobile app.
               </p>
             </div>
           </div>

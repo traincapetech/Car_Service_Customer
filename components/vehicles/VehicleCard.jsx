@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Card, CardHeader, CardContent, CardFooter } from "../ui/Card";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
-import { Car, Fuel, Gauge, Edit2, Trash2, Calendar } from "lucide-react";
+import { Car, Fuel, Gauge, Edit2, Trash2, Calendar, Wrench } from "lucide-react";
 import { FUEL_TYPES, TRANSMISSIONS } from "../../lib/vehicles";
 
 export default function VehicleCard({ vehicle, onEdit, onDelete }) {
@@ -89,25 +90,37 @@ export default function VehicleCard({ vehicle, onEdit, onDelete }) {
       </CardContent>
 
       {/* CARD ACTIONS */}
-      <CardFooter className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-        <Button
-          variant="outline"
-          size="sm"
-          leftIcon={Edit2}
-          onClick={() => onEdit(vehicle)}
-          aria-label={`Edit ${vehicle.make} ${vehicle.model} (${vehicle.registrationNumber})`}
-        >
-          Edit
-        </Button>
-        <Button
-          variant="subtleDanger"
-          size="sm"
-          leftIcon={Trash2}
-          onClick={() => onDelete(vehicle)}
-          aria-label={`Delete ${vehicle.make} ${vehicle.model} (${vehicle.registrationNumber})`}
-        >
-          Delete
-        </Button>
+      <CardFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+        <Link href={`/bookings/new?vehicleId=${vehicle.id}`}>
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={Wrench}
+            aria-label={`Book service for ${vehicle.make} ${vehicle.model}`}
+          >
+            Book Service
+          </Button>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={Edit2}
+            onClick={() => onEdit(vehicle)}
+            aria-label={`Edit ${vehicle.make} ${vehicle.model} (${vehicle.registrationNumber})`}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="subtleDanger"
+            size="sm"
+            leftIcon={Trash2}
+            onClick={() => onDelete(vehicle)}
+            aria-label={`Delete ${vehicle.make} ${vehicle.model} (${vehicle.registrationNumber})`}
+          >
+            Delete
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

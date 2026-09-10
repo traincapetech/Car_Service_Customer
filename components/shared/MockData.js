@@ -1,4 +1,4 @@
-// AutoCare Pro Central Mock Data Store
+// Addior Mechanics Pro Central Mock Data Store
 
 export const initialVehicles = [
   {

@@ -23,6 +23,8 @@ export default function ServiceDetailModal({
   onClose,
   service,
   onBookService,
+  onSelectService,
+  selectLabel,
 }) {
   if (!service) return null;
 
@@ -30,9 +32,14 @@ export default function ServiceDetailModal({
   const formattedPrice = formatPrice(service.basePrice);
   const formattedDuration = formatDuration(service.estimatedDurationMinutes);
 
-  const handleBook = () => {
-    if (onBookService) {
+  const handleAction = () => {
+    if (onSelectService) {
+      onSelectService(service);
+    } else if (onBookService) {
       onBookService(service);
+    }
+    if (onClose) {
+      onClose();
     }
   };
 
@@ -56,8 +63,8 @@ export default function ServiceDetailModal({
               >
                 {categoryMeta.label}
               </Badge>
-              <span className="text-xs text-slate-400 font-medium">
-                Service ID: #{service.id}
+              <span className="text-xs text-slate-500 font-medium">
+                Certified Service
               </span>
             </div>
             <p className="text-xs text-slate-600 font-medium pt-0.5">
@@ -186,11 +193,11 @@ export default function ServiceDetailModal({
             type="button"
             variant="primary"
             size="md"
-            onClick={handleBook}
+            onClick={handleAction}
             rightIcon={ArrowRight}
             className="w-full sm:w-auto shadow-sm"
           >
-            Book This Service
+            {selectLabel || (onSelectService ? "Select This Service" : "Book This Service")}
           </Button>
         </div>
       </div>

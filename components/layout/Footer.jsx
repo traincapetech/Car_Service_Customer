@@ -13,7 +13,7 @@ export default function Footer() {
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white font-bold">
                 <Car className="w-4 h-4" />
               </div>
-              <span className="text-base font-bold tracking-tight text-white">AutoCare Pro</span>
+              <span className="text-base font-bold tracking-tight text-white">Addior Mechanics Pro</span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
               Enterprise automotive service management platform. Delivering transparent digital diagnostics, guaranteed genuine OEM parts, certified master technicians, and complete digital service histories.
@@ -76,7 +76,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-          <p>© 2026 AutoCare Pro Operating System. All rights reserved.</p>
+          <p>© 2026 Addior Mechanics Pro Operating System. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-slate-300">Privacy Policy</a>
             <a href="#" className="hover:text-slate-300">Terms of Service</a>
