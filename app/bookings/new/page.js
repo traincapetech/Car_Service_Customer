@@ -50,7 +50,15 @@ import {
   getServiceInclusions,
 } from "../../../lib/services";
 import { vehiclesApi } from "../../../lib/vehicles";
-import { bookingsApi, CONTROLLED_TIME_SLOTS, formatSlotDisplay } from "../../../lib/bookings";
+import {
+  bookingsApi,
+  CONTROLLED_TIME_SLOTS,
+  formatSlotDisplay,
+  parseLocalDate,
+  formatLocalDate,
+  isSlotAvailableForDate,
+  getAvailableSlotsForDate,
+} from "../../../lib/bookings";
 import { useToast } from "../../../context/ToastContext";
 
 function BookingWizardContent() {
@@ -95,15 +103,27 @@ function BookingWizardContent() {
     }
   };
 
-  // Initialize minimum selectable date (tomorrow by default)
+  // Local calendar date definitions
+  const todayStr = formatLocalDate(new Date());
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDateStr = tomorrow.toISOString().split("T")[0];
+  const tomorrowStr = formatLocalDate(tomorrow);
 
   // Maximum selectable date (30 days ahead)
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 30);
-  const maxDateStr = maxDate.toISOString().split("T")[0];
+  const maxDateStr = formatLocalDate(maxDate);
+
+  // Check how many workshop slots remain open today
+  const availableSlotsToday = useMemo(() => {
+    return getAvailableSlotsForDate(todayStr);
+  }, [todayStr]);
+
+  // Minimum selectable date: today onwards
+  const minDateStr = todayStr;
+
+  // Default initial date: if today has slots remaining, pick today! Otherwise tomorrow.
+  const defaultDateStr = availableSlotsToday.length > 0 ? todayStr : tomorrowStr;
 
   useEffect(() => {
     let ignore = false;
@@ -165,8 +185,12 @@ function BookingWizardContent() {
           setCurrentStep(1);
         }
 
-        // Set default date to tomorrow
-        setSelectedDate(minDateStr);
+        // Set default date and slot
+        setSelectedDate(defaultDateStr);
+        const initialSlots = getAvailableSlotsForDate(defaultDateStr);
+        if (initialSlots.length > 0) {
+          setSelectedSlot(initialSlots[0].id);
+        }
       } catch (err) {
         if (!ignore) {
           setLoadError(err.message || "Failed to load booking resources.");
@@ -183,7 +207,17 @@ function BookingWizardContent() {
     return () => {
       ignore = true;
     };
-  }, [queryServiceId, queryVehicleId, minDateStr]);
+  }, [queryServiceId, queryVehicleId, defaultDateStr]);
+
+  // Synchronize date and select an available slot
+  const handleSelectDate = (newDate) => {
+    setSelectedDate(newDate);
+    if (!newDate) return;
+    const availableSlots = getAvailableSlotsForDate(newDate);
+    if (!availableSlots.some((s) => s.id === selectedSlot)) {
+      setSelectedSlot(availableSlots.length > 0 ? availableSlots[0].id : "");
+    }
+  };
 
   // Derive available categories dynamically from active services
   const availableCategories = useMemo(() => {
@@ -295,6 +329,18 @@ function BookingWizardContent() {
   const handleConfirmBooking = async () => {
     if (!selectedService || !selectedVehicle || !selectedDate || !selectedSlot) {
       toast.error("Please complete all required booking steps.");
+      return;
+    }
+
+    if (selectedDate < todayStr) {
+      toast.error("Past dates cannot be booked. Please select an upcoming appointment date.");
+      setCurrentStep(3);
+      return;
+    }
+
+    if (!isSlotAvailableForDate(selectedSlot, selectedDate)) {
+      toast.error("The selected time slot has elapsed or is no longer bookable. Please select an open slot.");
+      setCurrentStep(3);
       return;
     }
 
@@ -990,35 +1036,46 @@ function BookingWizardContent() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Pick a Date (Tomorrow onwards)
+                  Pick an Appointment Date (Today onwards)
                 </label>
                 <input
                   type="date"
-                  min={minDateStr}
+                  min={todayStr}
                   max={maxDateStr}
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val && val < todayStr) {
+                      toast.error("Past dates cannot be selected. Please choose today or an upcoming date.");
+                      handleSelectDate(todayStr);
+                    } else {
+                      handleSelectDate(val);
+                    }
+                  }}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-50 transition-all cursor-pointer"
                 />
               </div>
 
-              {/* Next 5 Days Quick Select */}
+              {/* Quick Select Dates (Today, Tomorrow, Upcoming) */}
               <div className="space-y-1.5 pt-1">
                 <span className="text-[11px] font-semibold text-slate-400">Quick Select:</span>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                  {[1, 2, 3, 4, 5].map((offset) => {
+                  {[0, 1, 2, 3, 4].map((offset) => {
                     const d = new Date();
                     d.setDate(d.getDate() + offset);
-                    const iso = d.toISOString().split("T")[0];
-                    const dayName = d.toLocaleDateString("en-IN", { weekday: "short" });
+                    const iso = formatLocalDate(d);
+                    const isToday = offset === 0;
+                    const isTomorrow = offset === 1;
+                    const dayName = isToday ? "Today" : isTomorrow ? "Tomorrow" : d.toLocaleDateString("en-IN", { weekday: "short" });
                     const dateNum = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
                     const isSelected = selectedDate === iso;
+                    const slotsCount = isToday ? availableSlotsToday.length : CONTROLLED_TIME_SLOTS.length;
 
                     return (
                       <button
                         key={iso}
                         type="button"
-                        onClick={() => setSelectedDate(iso)}
+                        onClick={() => handleSelectDate(iso)}
                         className={`p-2 rounded-xl text-center border transition-all ${
                           isSelected
                             ? "border-blue-600 bg-blue-600 text-white shadow-xs font-bold"
@@ -1027,6 +1084,19 @@ function BookingWizardContent() {
                       >
                         <span className="block text-[10px] uppercase opacity-80">{dayName}</span>
                         <span className="block text-xs font-bold mt-0.5">{dateNum}</span>
+                        {isToday && (
+                          <span
+                            className={`block text-[9px] mt-0.5 font-medium ${
+                              isSelected
+                                ? "text-blue-100"
+                                : slotsCount > 0
+                                ? "text-emerald-600"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            {slotsCount > 0 ? `${slotsCount} open` : "Closed"}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -1041,30 +1111,56 @@ function BookingWizardContent() {
                   <Clock className="w-4 h-4 text-blue-600" />
                   <span>Controlled Time Slots</span>
                 </div>
-                <span className="text-[11px] text-slate-400">Standard 1-hr arrival window</span>
+                <span className="text-[11px] text-slate-400">
+                  {selectedDate === todayStr ? "30-min lead buffer" : "Standard 1-hr arrival window"}
+                </span>
               </div>
+
+              {selectedDate === todayStr && availableSlotsToday.length === 0 && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2.5">
+                  <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    All service bay windows for today have elapsed. Please choose <strong>Tomorrow</strong> or another upcoming date.
+                  </span>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {CONTROLLED_TIME_SLOTS.map((slot) => {
-                  const isSelected = selectedSlot === slot.id;
+                  const isAvailable = isSlotAvailableForDate(slot, selectedDate);
+                  const isSelected = selectedSlot === slot.id && isAvailable;
+
                   return (
                     <button
                       key={slot.id}
                       type="button"
-                      onClick={() => setSelectedSlot(slot.id)}
+                      disabled={!isAvailable}
+                      onClick={() => isAvailable && setSelectedSlot(slot.id)}
                       className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                        isSelected
+                        !isAvailable
+                          ? "border-slate-200 bg-slate-50/70 opacity-40 cursor-not-allowed text-slate-400 border-dashed"
+                          : isSelected
                           ? "border-blue-600 bg-blue-50/40 text-blue-950 font-bold shadow-2xs ring-2 ring-blue-600/10"
                           : "border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 text-slate-700 font-semibold"
                       }`}
                     >
                       <div>
                         <span className="block text-xs">{slot.label}</span>
-                        <span className="block text-[10px] text-slate-400 font-normal">{slot.period}</span>
+                        <span className="block text-[10px] font-normal">
+                          {!isAvailable ? (
+                            <span className="text-amber-600 font-medium">Window Elapsed</span>
+                          ) : (
+                            <span className="text-slate-400">{slot.period}</span>
+                          )}
+                        </span>
                       </div>
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                          isSelected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"
+                          !isAvailable
+                            ? "border-slate-200 bg-slate-200/50 text-slate-400"
+                            : isSelected
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-slate-300 bg-white"
                         }`}
                       >
                         {isSelected && <Check className="w-2.5 h-2.5" />}
@@ -1103,8 +1199,18 @@ function BookingWizardContent() {
             <Button
               variant="primary"
               size="md"
-              disabled={!selectedDate || !selectedSlot}
-              onClick={() => setCurrentStep(4)}
+              disabled={!selectedDate || selectedDate < todayStr || !selectedSlot || !isSlotAvailableForDate(selectedSlot, selectedDate)}
+              onClick={() => {
+                if (!selectedDate || selectedDate < todayStr) {
+                  toast.error("Please pick a valid appointment date.");
+                  return;
+                }
+                if (!selectedSlot || !isSlotAvailableForDate(selectedSlot, selectedDate)) {
+                  toast.error("The selected slot is not open. Please select an available arrival window.");
+                  return;
+                }
+                setCurrentStep(4);
+              }}
               rightIcon={ArrowRight}
             >
               Review Booking
@@ -1129,6 +1235,18 @@ function BookingWizardContent() {
             <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
               <p className="font-bold">Booking Conflict or Validation Issue</p>
               <p>{submitError}</p>
+            </div>
+          )}
+
+          {selectedDate && (selectedDate < todayStr || !isSlotAvailableForDate(selectedSlot, selectedDate)) && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-3">
+              <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Invalid or Elapsed Slot Selected</p>
+                <p>
+                  The selected appointment date or workshop arrival window has elapsed. Please click &ldquo;Change Schedule&rdquo; below to select an open slot.
+                </p>
+              </div>
             </div>
           )}
 
@@ -1179,12 +1297,15 @@ function BookingWizardContent() {
                     Scheduled Date
                   </span>
                   <span className="text-sm font-bold text-slate-900">
-                    {new Date(selectedDate).toLocaleDateString("en-IN", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {selectedDate
+                      ? (selectedDate === todayStr ? "Today, " : selectedDate === tomorrowStr ? "Tomorrow, " : "") +
+                        (parseLocalDate(selectedDate)?.toLocaleDateString("en-IN", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }) || selectedDate)
+                      : "Date not selected"}
                   </span>
                 </div>
               </div>
@@ -1253,6 +1374,7 @@ function BookingWizardContent() {
             <Button
               variant="primary"
               size="md"
+              disabled={isSubmitting || !selectedDate || selectedDate < todayStr || !isSlotAvailableForDate(selectedSlot, selectedDate)}
               onClick={handleConfirmBooking}
               isLoading={isSubmitting}
               rightIcon={ArrowRight}
