@@ -15,6 +15,7 @@ import {
   Activity,
   ShieldCheck,
   Calendar,
+  Store,
 } from "lucide-react";
 import Badge from "../ui/Badge";
 import ConfirmDialog from "../ui/ConfirmDialog";
@@ -26,8 +27,13 @@ export default function DashboardSidebar() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const isPartnerOrAdmin = user?.role === "PARTNER" || user?.role === "ADMIN";
+
   const navItems = [
     { label: "Dashboard Overview", href: "/dashboard", icon: LayoutDashboard },
+    ...(isPartnerOrAdmin
+      ? [{ label: "Workshop Marketplace", href: "/marketplace", icon: Store, isPartner: true }]
+      : []),
     { label: "My Garage", href: "/garage", icon: Car },
     { label: "Service Catalog", href: "/services", icon: Wrench },
     { label: "My Bookings", href: "/bookings", icon: Calendar },
@@ -92,11 +98,16 @@ export default function DashboardSidebar() {
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Icon
-                    className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-400"
+                    className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : item.isPartner ? "text-blue-600" : "text-slate-400"
                       }`}
                     aria-hidden="true"
                   />
                   <span className="truncate">{item.label}</span>
+                  {item.isPartner && !isActive && (
+                    <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 tracking-wide shrink-0">
+                      Partner
+                    </span>
+                  )}
                 </div>
                 <ChevronRight
                   className={`w-3.5 h-3.5 shrink-0 transition-transform ${isActive ? "text-white/70" : "text-slate-300"

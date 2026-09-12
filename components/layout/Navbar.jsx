@@ -16,6 +16,7 @@ import {
   Car,
   Activity,
   ShieldCheck,
+  Store,
 } from "lucide-react";
 import Button from "../ui/Button";
 import Badge from "../ui/Badge";
@@ -57,9 +58,14 @@ export default function Navbar() {
     }
   };
 
+  const isPartnerOrAdmin = isAuthenticated && (user?.role === "PARTNER" || user?.role === "ADMIN");
+
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
+    ...(isPartnerOrAdmin
+      ? [{ label: "Marketplace", href: "/marketplace" }]
+      : []),
     ...(isAuthenticated
       ? [
         { label: "Dashboard", href: "/dashboard" },
@@ -153,6 +159,17 @@ export default function Navbar() {
                     </div>
 
                     <div className="py-1">
+                      {isPartnerOrAdmin && (
+                        <Link
+                          href="/marketplace"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50/60 hover:bg-blue-100/70 transition-colors border-b border-blue-100"
+                        >
+                          <Store className="w-4 h-4 text-blue-600" />
+                          <span>Workshop Marketplace</span>
+                        </Link>
+                      )}
+
                       <Link
                         href="/dashboard"
                         className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
