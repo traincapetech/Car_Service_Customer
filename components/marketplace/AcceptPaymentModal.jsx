@@ -39,45 +39,140 @@ export default function AcceptPaymentModal({
   const walletBalance = wallet?.balance !== undefined ? Number(wallet.balance) : 0;
   const hasSufficientWallet = walletBalance >= fee;
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (typeof window !== "undefined" && window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleConfirmPayment = async () => {
     setError(null);
     setRaceLossInfo(null);
 
-    if (paymentMethod === "RAZORPAY") {
-      setError("Razorpay checkout is scheduled for Step 18E. Please select Workshop Wallet for instant claim.");
-      return;
-    }
-
-    if (walletBalance < fee) {
-      setError(`Insufficient wallet balance. You need ₹${fee.toFixed(2)}, but your balance is ₹${walletBalance.toFixed(2)}. Please top up your wallet.`);
-      return;
-    }
-
-    setIsProcessing(true);
-    const idempotencyKey = `WAL-CLAIM-${opportunity.id}-${Date.now()}`;
-
-    try {
-      const result = await marketplaceApi.payWithWallet(opportunity.id, idempotencyKey);
-
-      if (result.paymentStatus === "REFUNDED" || result.paymentStatus === "REFUND_PENDING") {
-        // Race condition: Another workshop claimed first!
-        setRaceLossInfo({
-          message: "Another workshop confirmed acceptance moments before your submission.",
-          subtext: `Opportunity #${opportunity.requestReference || opportunity.id} has been claimed. Your ₹${fee.toFixed(2)} lead fee was automatically refunded back to your wallet.`,
-        });
-        toast?.info("Opportunity claimed by another workshop. Acceptance fee refunded.");
-        onPaymentSuccess && onPaymentSuccess(opportunity.id, "LOST");
-      } else {
-        // Successfully won!
-        toast?.success("Opportunity claimed successfully! Customer details unlocked.");
-        onClose();
-        onPaymentSuccess && onPaymentSuccess(opportunity.id, "CUSTOMER_DETAILS_UNLOCKED");
+    if (paymentMethod === "WALLET") {
+      if (walletBalance < fee) {
+        setError(`Insufficient wallet balance. You need ₹${fee.toFixed(2)}, but your balance is ₹${walletBalance.toFixed(2)}. Please top up your wallet.`);
+        return;
       }
-    } catch (err) {
-      console.error("Wallet claim error:", err);
-      setError(err.message || "Failed to process payment. Please try again.");
-    } finally {
-      setIsProcessing(false);
+
+      setIsProcessing(true);
+      const idempotencyKey = `WAL-CLAIM-${opportunity.id}-${Date.now()}`;
+
+      try {
+        const result = await marketplaceApi.payWithWallet(opportunity.id, idempotencyKey);
+
+        if (result.paymentStatus === "REFUNDED" || result.paymentStatus === "REFUND_PENDING") {
+          // Race condition: Another workshop claimed first!
+          setRaceLossInfo({
+            message: "Another workshop confirmed acceptance moments before your submission.",
+            subtext: `Opportunity #${opportunity.requestReference || opportunity.id} has been claimed. Your ₹${fee.toFixed(2)} lead fee was automatically refunded back to your wallet.`,
+            refundStatus: result.paymentStatus,
+          });
+          toast?.info("Opportunity claimed by another workshop. Acceptance fee refunded.");
+          onPaymentSuccess && onPaymentSuccess(opportunity.id, "LOST");
+        } else {
+          // Successfully won!
+          toast?.success("Opportunity claimed successfully! Customer details unlocked.");
+          onClose();
+          onPaymentSuccess && onPaymentSuccess(opportunity.id, "CUSTOMER_DETAILS_UNLOCKED");
+        }
+      } catch (err) {
+        console.error("Wallet claim error:", err);
+        setError(err.message || "Failed to process wallet payment. Please try again.");
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    if (paymentMethod === "RAZORPAY") {
+      setIsProcessing(true);
+      const idempotencyKey = `RZP-CLAIM-${opportunity.id}-${Date.now()}`;
+
+      try {
+        // Step 1: Initiate Razorpay payment on backend
+        const initResult = await marketplaceApi.initiateRazorpayPayment(opportunity.id, idempotencyKey);
+
+        if (!initResult || !initResult.razorpayOrderId) {
+          throw new Error("Unable to create Razorpay order. Please try again.");
+        }
+
+        // Step 2: Load Razorpay checkout script
+        const isLoaded = await loadRazorpayScript();
+        if (!isLoaded || typeof window === "undefined" || !window.Razorpay) {
+          throw new Error("Failed to load Razorpay checkout SDK. Please verify your connection or use Workshop Wallet.");
+        }
+
+        // Step 3: Open Razorpay checkout modal
+        const options = {
+          key: initResult.razorpayKeyId,
+          amount: Math.round(Number(initResult.amount) * 100),
+          currency: initResult.currency || "INR",
+          name: "Car Service Platform",
+          description: `Lead Acceptance Fee - Opportunity #${opportunity.requestReference || opportunity.id}`,
+          order_id: initResult.razorpayOrderId,
+          theme: {
+            color: "#0f172a",
+          },
+          handler: async function (response) {
+            try {
+              setIsProcessing(true);
+              const verifyResult = await marketplaceApi.verifyRazorpayPayment(initResult.paymentId, {
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+
+              if (verifyResult.paymentStatus === "REFUNDED" || verifyResult.paymentStatus === "REFUND_PENDING") {
+                // Race condition loss: Another workshop claimed first!
+                setRaceLossInfo({
+                  message: "Payment received, but this opportunity was already accepted by another workshop. Your payment is being refunded.",
+                  subtext: `Opportunity #${opportunity.requestReference || opportunity.id} was claimed by another workshop before verification concluded. Your payment of ₹${fee.toFixed(2)} (Payment Ref: ${response.razorpay_payment_id}) has been recorded and an automated refund has been initiated.`,
+                  refundStatus: verifyResult.paymentStatus,
+                });
+                toast?.info("Opportunity claimed by another workshop. Payment is being refunded.");
+                onPaymentSuccess && onPaymentSuccess(opportunity.id, "LOST");
+              } else {
+                // Winner!
+                toast?.success("Opportunity claimed successfully! Customer details unlocked.");
+                onClose();
+                onPaymentSuccess && onPaymentSuccess(opportunity.id, "CUSTOMER_DETAILS_UNLOCKED");
+              }
+            } catch (verifyErr) {
+              console.error("Razorpay verification error:", verifyErr);
+              setError(verifyErr.message || "Payment verification failed. Please contact support if your account was debited.");
+            } finally {
+              setIsProcessing(false);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setIsProcessing(false);
+            },
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (failResponse) {
+          console.error("Razorpay payment failed:", failResponse.error);
+          setError(failResponse.error?.description || "Payment failed at gateway.");
+          setIsProcessing(false);
+        });
+        rzp.open();
+      } catch (err) {
+        console.error("Razorpay initiation error:", err);
+        setError(err.message || "Failed to initiate Razorpay checkout.");
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -225,15 +320,15 @@ export default function AcceptPaymentModal({
                     <div className="flex items-center gap-2">
                       <CreditCard className="w-4 h-4 text-blue-600" />
                       <span className="text-xs font-bold text-slate-900">
-                        Online Checkout (UPI / Cards)
+                        Pay with Razorpay (Cards / UPI / NetBanking)
                       </span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                      Coming in Step 18E
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Online Gateway
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Razorpay gateway foundation prepared. Please use Workshop Wallet for instant unlock during Step 18B.
+                    Pay securely using Razorpay Checkout. Full automated refund protection if the opportunity is claimed first.
                   </p>
                 </div>
               </label>
@@ -243,7 +338,7 @@ export default function AcceptPaymentModal({
             <div className="p-3 bg-blue-50/70 border border-blue-200/60 rounded-xl flex items-start gap-2 text-[11px] text-slate-600 leading-relaxed">
               <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
               <span>
-                By confirming, ₹{fee.toFixed(2)} will be debited from your workshop wallet. Customer contact details will immediately unlock upon winning the atomic claim.
+                Authoritative acceptance fee: ₹{fee.toFixed(2)}. Customer contact details unlock instantly upon winning the atomic claim. If another workshop claims first, your payment is automatically refunded.
               </span>
             </div>
 

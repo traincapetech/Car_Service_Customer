@@ -11,6 +11,7 @@ import ErrorState from "../../../components/ui/ErrorState";
 import { BookingDetailsSkeleton } from "../../../components/booking/BookingSkeleton";
 import CancelBookingModal from "../../../components/booking/CancelBookingModal";
 import { bookingsApi, getBookingStatusMeta, formatBookingDate, formatSlotDisplay } from "../../../lib/bookings";
+import { marketplaceApi } from "../../../lib/marketplace";
 import { formatPrice, formatDuration, getCategoryMeta } from "../../../lib/services";
 import {
   Car,
@@ -24,6 +25,11 @@ import {
   FileText,
   AlertTriangle,
   Info,
+  Activity,
+  MapPin,
+  Phone,
+  ExternalLink,
+  Building2,
 } from "lucide-react";
 
 export default function BookingDetailsPage() {
@@ -32,6 +38,7 @@ export default function BookingDetailsPage() {
   const bookingId = params?.id;
 
   const [booking, setBooking] = useState(null);
+  const [tracking, setTracking] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -47,6 +54,16 @@ export default function BookingDetailsPage() {
         const data = await bookingsApi.getBooking(bookingId);
         if (!ignore) {
           setBooking(data);
+        }
+
+        // Try fetching active tracking details
+        try {
+          const trackData = await marketplaceApi.getCustomerTracking({ bookingId });
+          if (!ignore && trackData) {
+            setTracking(trackData);
+          }
+        } catch {
+          // Tracking not yet initialized (e.g. pending matching)
         }
       } catch (err) {
         if (!ignore) {
@@ -99,7 +116,9 @@ export default function BookingDetailsPage() {
       : booking.servicePriceSnapshot != null
       ? booking.servicePriceSnapshot
       : booking.estimatedPrice;
-  const isCancellable = booking.status === "PENDING" || booking.status === "CONFIRMED";
+  const isCancellable =
+    (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
+    (tracking ? tracking.cancellable !== false : true);
 
   return (
     <CustomerShell>
@@ -118,11 +137,18 @@ export default function BookingDetailsPage() {
           { label: booking.bookingReference || `ID #${booking.id}` },
         ]}
         actions={
-          <Link href="/bookings">
-            <Button variant="outline" size="sm" leftIcon={ArrowLeft}>
-              Back to Bookings
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href={`/tracking?bookingId=${booking.id}`}>
+              <Button variant="primary" size="sm" leftIcon={Activity}>
+                Live Tracking
+              </Button>
+            </Link>
+            <Link href="/bookings">
+              <Button variant="outline" size="sm" leftIcon={ArrowLeft}>
+                Back to Bookings
+              </Button>
+            </Link>
+          </div>
         }
       />
 
@@ -140,10 +166,105 @@ export default function BookingDetailsPage() {
         </div>
       )}
 
+      {/* LIVE PROGRESS & WORKSHOP TRACKING BANNER */}
+      {booking.status !== "CANCELLED" && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white shadow-md border border-blue-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400">
+                Live Workshop Floor Telemetry
+              </span>
+              {tracking?.stage && (
+                <span className="text-[11px] font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
+                  Stage {tracking.stage}/7
+                </span>
+              )}
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              {tracking?.statusDescription ||
+                (booking.status === "CONFIRMED"
+                  ? "Appointment Confirmed & Assigned to Workshop"
+                  : "Service Bay Scheduled")}
+            </h3>
+            <p className="text-xs text-slate-300">
+              {tracking?.stage >= 3
+                ? "Physical inspection and service work is actively underway at the certified workshop bay."
+                : "Real-time updates directly from certified garage floor technicians."}
+            </p>
+          </div>
+
+          <Link href={`/tracking?bookingId=${booking.id}`} className="shrink-0 w-full sm:w-auto">
+            <Button variant="primary" size="md" className="w-full sm:w-auto shadow-lg bg-blue-600 hover:bg-blue-500">
+              <Activity className="w-4 h-4 mr-2 text-emerald-300 animate-pulse" />
+              Open Live Tracker
+              <ExternalLink className="w-3.5 h-3.5 ml-1.5 opacity-70" />
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* MAIN DETAILS GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Columns: Core Specs */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Assigned Workshop Card (if matched or in tracking) */}
+          {(tracking?.workshopName || booking.workshop) && (
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Assigned Workshop Partner
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {tracking?.workshopName || booking.workshop?.name}
+                    </h3>
+                  </div>
+                </div>
+                <Badge variant="verified" size="sm">
+                  Verified Partner
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {(tracking?.workshopAddress || booking.workshop?.address) && (
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
+                    <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Workshop Bay Address</span>
+                      <span className="text-slate-700 font-medium mt-0.5 block">
+                        {tracking?.workshopAddress || booking.workshop?.address}
+                        {booking.workshop?.city ? `, ${booking.workshop.city}` : ""}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {(tracking?.workshopPhone || booking.workshop?.phone) && (
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
+                    <Phone className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Workshop Bay Contact</span>
+                      <a
+                        href={`tel:${tracking?.workshopPhone || booking.workshop?.phone}`}
+                        className="text-blue-600 hover:text-blue-700 font-bold mt-0.5 block flex items-center gap-1"
+                      >
+                        {tracking?.workshopPhone || booking.workshop?.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Service Package Card */}
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -301,6 +422,15 @@ export default function BookingDetailsPage() {
 
           {/* Action Buttons */}
           <div className="space-y-2.5">
+            {booking.status !== "CANCELLED" && (
+              <Link href={`/tracking?bookingId=${booking.id}`} className="block">
+                <Button variant="primary" size="md" className="w-full shadow-sm">
+                  <Activity className="w-4 h-4 mr-2" />
+                  Track Live Progress
+                </Button>
+              </Link>
+            )}
+
             {isCancellable && (
               <Button
                 variant="outline"
@@ -311,6 +441,15 @@ export default function BookingDetailsPage() {
                 <XCircle className="w-4 h-4 mr-1.5" />
                 Cancel Appointment
               </Button>
+            )}
+
+            {booking.status !== "CANCELLED" && !isCancellable && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  Vehicle intake completed at workshop bay. In accordance with platform safety policies, bookings in active service cannot be cancelled online.
+                </span>
+              </div>
             )}
 
             <Link href="/services" className="block">

@@ -1454,19 +1454,19 @@ function BookingWizardContent() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link href={`/tracking?bookingId=${createdBooking.id}`}>
+              <Button variant="primary" size="md" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm" leftIcon={Activity}>
+                Track Live Progress
+              </Button>
+            </Link>
             <Link href={`/bookings/${createdBooking.id}`}>
-              <Button variant="primary" size="md" className="w-full sm:w-auto">
+              <Button variant="outline" size="md" className="w-full sm:w-auto">
                 View Booking Details
               </Button>
             </Link>
             <Link href="/bookings">
-              <Button variant="outline" size="md" className="w-full sm:w-auto">
-                Go to My Bookings
-              </Button>
-            </Link>
-            <Link href="/services">
               <Button variant="ghost" size="md" className="w-full sm:w-auto">
-                Browse More Services
+                Go to My Bookings
               </Button>
             </Link>
           </div>

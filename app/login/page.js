@@ -19,7 +19,7 @@ function LoginFormContent() {
   const redirectPath = searchParams.get("redirect") || "/dashboard";
   const sessionExpired = searchParams.get("sessionExpired");
 
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, user, isAuthenticated, isLoading } = useAuth();
   const toast = useToast();
 
   const [formData, setFormData] = useState({
@@ -30,12 +30,20 @@ function LoginFormContent() {
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // If already authenticated, redirect to dashboard
+  // If already authenticated, redirect to role-specific dashboard
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace(redirectPath);
+    if (!isLoading && isAuthenticated && user) {
+      if (redirectPath && redirectPath !== "/dashboard") {
+        router.replace(redirectPath);
+      } else if (user.role === "ADMIN") {
+        router.replace("/admin/dashboard");
+      } else if (user.role === "PARTNER") {
+        router.replace("/marketplace");
+      } else {
+        router.replace("/dashboard");
+      }
     }
-  }, [isLoading, isAuthenticated, router, redirectPath]);
+  }, [isLoading, isAuthenticated, user, router, redirectPath]);
 
   const activeError = serverError || (sessionExpired ? "Your session has expired. Please sign in again with your credentials." : "");
 
@@ -70,9 +78,17 @@ function LoginFormContent() {
 
     setIsSubmitting(true);
     try {
-      await login(formData.email.trim(), formData.password);
+      const userData = await login(formData.email.trim(), formData.password);
       toast.success("Welcome back! Redirecting to your dashboard...");
-      router.push(redirectPath);
+      if (redirectPath && redirectPath !== "/dashboard") {
+        router.push(redirectPath);
+      } else if (userData?.role === "ADMIN") {
+        router.push("/admin/dashboard");
+      } else if (userData?.role === "PARTNER") {
+        router.push("/marketplace");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setServerError(
         err.message || "Invalid email or password. Please verify your credentials and try again."
