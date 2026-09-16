@@ -55,7 +55,7 @@ const ADMIN_NAV_GROUPS = [
         label: "Customers",
         href: "/admin/customers",
         icon: Users,
-        isFunctional: false,
+        isFunctional: true,
       },
       {
         id: "workshops",

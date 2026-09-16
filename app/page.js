@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/ui/Button";
@@ -20,12 +20,164 @@ import {
   Star,
   Activity,
   Award,
-  Users
+  Users,
+  Video,
+  Eye,
+  Maximize2,
+  X,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { servicePackages } from "../components/shared/MockData";
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
+  const [activeWorkIndex, setActiveWorkIndex] = useState(0);
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [isHeroPlaying, setIsHeroPlaying] = useState(true);
+  const [isHeroMuted, setIsHeroMuted] = useState(true);
+  const heroVideoRef = React.useRef(null);
+
+  const toggleHeroPlay = () => {
+    if (heroVideoRef.current) {
+      if (isHeroPlaying) {
+        heroVideoRef.current.pause();
+      } else {
+        heroVideoRef.current.play();
+      }
+      setIsHeroPlaying(!isHeroPlaying);
+    }
+  };
+
+  const toggleHeroMute = () => {
+    if (heroVideoRef.current) {
+      heroVideoRef.current.muted = !isHeroMuted;
+      setIsHeroMuted(!isHeroMuted);
+    }
+  };
+
+  const workShowcase = [
+    {
+      id: "live-service-video",
+      tabLabel: "▶ 4K Service Video",
+      title: "Real Workshop Service in Action (Live Footage)",
+      category: "Authorized Bay Footage",
+      badge: "Real Video Footage",
+      video: "/videos/service-action.mp4",
+      image: "/images/workshop-hero.jpg",
+      description:
+        "Watch authentic, unedited footage of certified master technicians servicing luxury and everyday vehicles inside authorized service bays. Using computerized diagnostics and genuine OEM replacement parts.",
+      stats: [
+        { label: "Quality", val: "4K / 1080p HD" },
+        { label: "Location", val: "Bay 04 Main Lift" },
+        { label: "Technicians", val: "Master Certified" },
+        { label: "Telemetry", val: "100% Live Tracked" },
+      ],
+      highlights: [
+        "Uncut authentic recording of mechanical operations",
+        "Calibrated digital torque wrenches on all chassis bolts",
+        "OBD-II ECU computer telemetry scanning during intake",
+        "Detailed digital inspection report generated automatically",
+      ],
+      serviceUrl: "/services",
+    },
+    {
+      id: "engine-oil",
+      tabLabel: "Engine Service",
+      title: "Engine Oil & Genuine Filter Service",
+      category: "Periodic Maintenance",
+      badge: "Most Requested",
+      image: "/images/engine-oil.jpg",
+      description:
+        "Watch precision synthetic oil replacement using Motul & Castrol 5W-30 engine oils. Paired with OEM spin-on filters and sump plug gasket renewal to protect high-performance engines from internal friction.",
+      stats: [
+        { label: "Grade Used", val: "5W-30 Synthetic" },
+        { label: "OEM Parts", val: "100% Certified" },
+        { label: "Duration", val: "45-60 Mins" },
+        { label: "Warranty", val: "10,000 KM" },
+      ],
+      highlights: [
+        "Complete old engine oil gravity drain & flush",
+        "Factory-sealed OEM oil filter cartridge swap",
+        "Magnetic drain plug de-sludge & new copper washer",
+        "Digital dipstick & OBD-II oil service interval reset",
+      ],
+      serviceUrl: "/services",
+    },
+    {
+      id: "wheel-alignment",
+      tabLabel: "3D Alignment",
+      title: "3D Laser Wheel Alignment & Balancing",
+      category: "Tyres & Suspension",
+      badge: "Computerized Precision",
+      image: "/images/wheel-alignment.jpg",
+      description:
+        "High-definition 3D laser cameras measure camber, caster, and toe angles in real time. We eliminate uneven tire wear, steering pull, and high-speed vibrations using automated laser telemetry.",
+      stats: [
+        { label: "Technology", val: "Hunter 3D Hawkeye" },
+        { label: "Accuracy", val: "±0.01 Degrees" },
+        { label: "Duration", val: "45 Mins" },
+        { label: "Included", val: "4 Wheels + Balancing" },
+      ],
+      highlights: [
+        "Four-wheel 3D optical target laser scanning",
+        "Tie-rod adjustment for zero steering wheel offset",
+        "Dynamic high-speed computerized wheel balancing",
+        "Color-coded pre & post alignment digital printout",
+      ],
+      serviceUrl: "/services",
+    },
+    {
+      id: "ceramic-detailing",
+      tabLabel: "Ceramic Detailing",
+      title: "Ceramic Coating & Deep Foam Detailing",
+      category: "Paint & Interior Care",
+      badge: "Showroom Gloss",
+      image: "/images/ceramic-detailing.jpg",
+      description:
+        "Experience multi-stage paint correction with dual-action orbital polishers followed by 9H nano-ceramic hydrophobic shield application, protecting your car from UV oxidation, swirl marks, and acid rain.",
+      stats: [
+        { label: "Protection", val: "9H Nano Ceramic" },
+        { label: "Durability", val: "Up to 3 Years" },
+        { label: "Process", val: "3-Stage Correction" },
+        { label: "Hydrophobic", val: "110° Water Beading" },
+      ],
+      highlights: [
+        "pH-neutral thick active snow foam touchless wash",
+        "Clay bar paint decontamination & iron fallout removal",
+        "Dual-action machine swirl & scratch elimination",
+        "High-gloss ceramic polymer heat-cured bonding",
+      ],
+      serviceUrl: "/services",
+    },
+    {
+      id: "brake-service",
+      tabLabel: "Brake Overhaul",
+      title: "High-Performance Brembo Brake Overhaul",
+      category: "Safety & Braking",
+      badge: "Safety Certified",
+      image: "/images/brake-service.jpg",
+      description:
+        "Complete inspection and overhaul of front and rear disc braking systems. From rotor skimming and ceramic brake pad installation to digital torque wrench calibration on caliper mounting pins.",
+      stats: [
+        { label: "Pads", val: "OE Ceramic Friction" },
+        { label: "Torque Check", val: "Calibrated Digital" },
+        { label: "Fluid", val: "DOT-4 High Boiling" },
+        { label: "Warranty", val: "6 Months" },
+      ],
+      highlights: [
+        "Ventilated rotor thickness & runout micrometer check",
+        "Anti-squeal ceramic paste applied to pad backings",
+        "Caliper slide pin synthetic silicone greasing",
+        "Pressure bleeder fluid flush to eliminate air pockets",
+      ],
+      serviceUrl: "/services",
+    },
+  ];
+
+  const currentWork = workShowcase[activeWorkIndex] || workShowcase[0];
 
   const categories = [
     { name: "Periodic Maintenance", count: "18 Services", price: "₹2,499", icon: Wrench },
@@ -137,31 +289,263 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Modern Automotive Feature Visual */}
+            {/* Right: Modern Automotive Feature Visual with Real Video & Stream */}
             <div className="lg:col-span-5 relative">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-white p-3">
-                <img
-                  src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1000&q=80"
-                  alt="Modern Mercedes Car Service"
-                  className="rounded-2xl object-cover w-full h-[360px] sm:h-[420px]"
-                />
-                <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                      Live Diagnostic Telemetry
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-white p-3 group">
+                <div className="relative rounded-2xl overflow-hidden bg-slate-950">
+                  <video
+                    ref={heroVideoRef}
+                    src="/videos/service-action.mp4"
+                    poster="/images/workshop-hero.jpg"
+                    autoPlay
+                    loop
+                    muted={isHeroMuted}
+                    playsInline
+                    className="w-full h-[360px] sm:h-[440px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 pointer-events-none rounded-2xl" />
+
+                  {/* Top Live Badge & Controls */}
+                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-auto">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-black/75 backdrop-blur-md text-white border border-white/20 shadow-lg">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                      4K LIVE • BAY 04 SERVICE IN ACTION
                     </span>
-                    <Badge variant="success" size="sm" dot>Active Bay 04</Badge>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={toggleHeroPlay}
+                        className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-white/20 transition-all shadow-md"
+                        title={isHeroPlaying ? "Pause Video" : "Play Video"}
+                      >
+                        {isHeroPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white" />}
+                      </button>
+                      <button
+                        onClick={toggleHeroMute}
+                        className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-white/20 transition-all shadow-md"
+                        title={isHeroMuted ? "Unmute Audio" : "Mute Audio"}
+                      >
+                        {isHeroMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    BMW & Mercedes certified electronic calibration hub in progress.
-                  </p>
+
+                  {/* Bottom Action / Telemetry Card */}
+                  <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-xl space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                        Real Workshop Service Stream
+                      </span>
+                      <Badge variant="success" size="sm" dot>Live Telemetry</Badge>
+                    </div>
+                    <p className="text-[11px] text-slate-600">
+                      Master technicians performing multi-point electronic chassis & engine calibration.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* WORK IN ACTION: REAL SERVICE & WORKSHOP SHOWCASE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+              <Video className="w-3.5 h-3.5 text-blue-600" />
+              <span>Authentic Workshop Footage & Real Service Video</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              See Certified Mechanics In Action
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
+              Inspect real photographic documentation and authentic video footage from our certified service bays. Every service is backed by digital telemetry and guaranteed 100% genuine OEM spares.
+            </p>
+          </div>
+          <Link href="/services">
+            <Button variant="outline" size="sm" rightIcon={ArrowRight}>
+              Explore Full Catalog
+            </Button>
+          </Link>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200">
+          {workShowcase.map((item, idx) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveWorkIndex(idx)}
+              className={`flex items-center justify-center gap-1.5 py-3 px-2.5 rounded-xl text-xs font-bold transition-all ${
+                activeWorkIndex === idx
+                  ? "bg-white text-slate-900 shadow-sm border border-slate-200/80"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+              }`}
+            >
+              {item.video ? (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+              ) : (
+                <Wrench className={`w-3.5 h-3.5 ${activeWorkIndex === idx ? "text-blue-600" : "text-slate-400"}`} />
+              )}
+              <span className="truncate">{item.tabLabel}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Featured Showcase Card */}
+        {currentWork && (
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+              {/* Left Column: Visual Media (Video or High-Res Image) */}
+              <div className="lg:col-span-7 relative bg-slate-950 flex items-center justify-center min-h-[380px] sm:min-h-[460px] group overflow-hidden">
+                {currentWork.video ? (
+                  <video
+                    src={currentWork.video}
+                    poster={currentWork.image}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <>
+                    <img
+                      src={currentWork.image}
+                      alt={currentWork.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30 pointer-events-none" />
+                  </>
+                )}
+
+                {/* Badges on media */}
+                <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2 pointer-events-none">
+                  <Badge variant="blue" size="sm" dot>
+                    {currentWork.badge}
+                  </Badge>
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/60 text-white backdrop-blur-md border border-white/20">
+                    {currentWork.category}
+                  </span>
+                </div>
+
+                {/* Enlarge Button (if photo) */}
+                {!currentWork.video && (
+                  <button
+                    onClick={() => setLightboxImage(currentWork.image)}
+                    className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/70 hover:bg-black text-white text-xs font-medium backdrop-blur-md border border-white/20 transition-colors shadow-lg"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span>Enlarge HD View</span>
+                  </button>
+                )}
+
+                {/* Subtitle tag on bottom left of image */}
+                {!currentWork.video && (
+                  <div className="absolute bottom-4 left-4 text-white text-xs font-semibold drop-shadow-md">
+                    <p className="text-white/90 text-sm font-bold">{currentWork.title}</p>
+                    <p className="text-white/60 text-[11px]">Authorized Service Bay • Certified Technicians</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Work Breakdown & Technical Specs */}
+              <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-slate-50/40">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                      Standardized Protocol
+                    </span>
+                    <Badge variant="success" size="sm">
+                      Zero Guesswork
+                    </Badge>
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                    {currentWork.title}
+                  </h3>
+
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    {currentWork.description}
+                  </p>
+
+                  {/* 4 Technical Metrics */}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    {currentWork.stats.map((s, i) => (
+                      <div key={i} className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">{s.label}</p>
+                        <p className="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">{s.val}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Checklist of inclusions */}
+                  <div className="space-y-2 pt-2 border-t border-slate-200/80">
+                    <p className="text-xs font-bold text-slate-900">Key Steps Performed:</p>
+                    <ul className="space-y-1.5 text-xs text-slate-600">
+                      {currentWork.highlights.map((h, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* CTAs */}
+                <div className="pt-4 border-t border-slate-200 flex items-center gap-3">
+                  <Link href="/services" className="flex-1">
+                    <Button variant="blue" size="md" fullWidth rightIcon={ArrowRight}>
+                      Book This Service
+                    </Button>
+                  </Link>
+                  <button
+                    onClick={() => setLightboxImage(currentWork.image)}
+                    className="p-2.5 rounded-xl border border-slate-300 hover:bg-white text-slate-700 transition-colors"
+                    title="View Full Resolution"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* LIGHTBOX MODAL FOR FULL-RES IMAGE PREVIEW */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={lightboxImage}
+              alt="High Resolution Service Bay View"
+              className="max-h-[82vh] w-auto object-contain rounded-2xl shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <p className="text-white/70 text-xs mt-3 text-center">
+              Addior Mechanics Authorized Service Bay • Click anywhere to close
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* SERVICE CATEGORIES GRID (GoMechanic Style Discovery) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
