@@ -24,6 +24,12 @@ export default function ProtectedRoute({ children, allowedRoles }) {
         } else if (user.role === "CUSTOMER") {
           router.replace("/dashboard");
         }
+      } else if (pathname === "/marketplace" || pathname.startsWith("/marketplace")) {
+        if (user.role === "ADMIN") {
+          router.replace("/admin/marketplace");
+        } else if (user.role === "CUSTOMER") {
+          router.replace("/dashboard");
+        }
       }
     }
   }, [isLoading, isAuthenticated, user, allowedRoles, pathname, router]);

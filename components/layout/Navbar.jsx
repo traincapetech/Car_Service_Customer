@@ -58,15 +58,23 @@ export default function Navbar() {
     }
   };
 
-  const isPartnerOrAdmin = isAuthenticated && (user?.role === "PARTNER" || user?.role === "ADMIN");
+  const isPartner = isAuthenticated && user?.role === "PARTNER";
+  const isAdmin = isAuthenticated && user?.role === "ADMIN";
 
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
-    ...(isPartnerOrAdmin
+    ...(isPartner
       ? [{ label: "Marketplace", href: "/marketplace" }]
       : []),
-    ...(isAuthenticated
+    ...(isAdmin
+      ? [
+        { label: "Admin Console", href: "/admin/dashboard" },
+        { label: "Marketplace Center", href: "/admin/marketplace" },
+        { label: "Rules & Config", href: "/admin/configuration" },
+      ]
+      : []),
+    ...(isAuthenticated && !isAdmin
       ? [
         { label: "Dashboard", href: "/dashboard" },
         { label: "My Garage", href: "/garage" },
@@ -159,7 +167,7 @@ export default function Navbar() {
                     </div>
 
                     <div className="py-1">
-                      {isPartnerOrAdmin && (
+                      {isPartner && (
                         <Link
                           href="/marketplace"
                           onClick={() => setUserDropdownOpen(false)}
@@ -168,6 +176,27 @@ export default function Navbar() {
                           <Store className="w-4 h-4 text-blue-600" />
                           <span>Workshop Marketplace</span>
                         </Link>
+                      )}
+
+                      {isAdmin && (
+                        <>
+                          <Link
+                            href="/admin/dashboard"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-slate-800 bg-slate-100/60 hover:bg-slate-200/70 transition-colors border-b border-slate-200"
+                          >
+                            <ShieldCheck className="w-4 h-4 text-slate-700" />
+                            <span>Admin Console</span>
+                          </Link>
+                          <Link
+                            href="/admin/marketplace"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50/60 hover:bg-blue-100/70 transition-colors border-b border-blue-100"
+                          >
+                            <Store className="w-4 h-4 text-blue-600" />
+                            <span>Marketplace Control Center</span>
+                          </Link>
+                        </>
                       )}
 
                       <Link

@@ -27,12 +27,16 @@ export default function DashboardSidebar() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const isPartnerOrAdmin = user?.role === "PARTNER" || user?.role === "ADMIN";
+  const isPartner = user?.role === "PARTNER";
+  const isAdmin = user?.role === "ADMIN";
 
   const navItems = [
     { label: "Dashboard Overview", href: "/dashboard", icon: LayoutDashboard },
-    ...(isPartnerOrAdmin
+    ...(isPartner
       ? [{ label: "Workshop Marketplace", href: "/marketplace", icon: Store, isPartner: true }]
+      : []),
+    ...(isAdmin
+      ? [{ label: "Marketplace Control Center", href: "/admin/marketplace", icon: Store, isAdmin: true }]
       : []),
     { label: "My Garage", href: "/garage", icon: Car },
     { label: "Service Catalog", href: "/services", icon: Wrench },

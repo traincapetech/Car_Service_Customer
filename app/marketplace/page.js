@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ProtectedRoute from "../../components/auth/ProtectedRoute";
 import PageHeader from "../../components/ui/PageHeader";
 import Badge from "../../components/ui/Badge";
@@ -38,9 +39,21 @@ import RefundsHistoryModal from "../../components/marketplace/RefundsHistoryModa
 import WalletTransactionsModal from "../../components/marketplace/WalletTransactionsModal";
 import WorkshopJobCard from "../../components/marketplace/WorkshopJobCard";
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
   const { user } = useAuth();
+  const router = useRouter();
   const toast = useToast();
+
+  // Automatic role redirection: Admins go to Admin Marketplace, Customers go to Dashboard
+  useEffect(() => {
+    if (user) {
+      if (user.role === "ADMIN") {
+        router.replace("/admin/marketplace");
+      } else if (user.role === "CUSTOMER") {
+        router.replace("/dashboard");
+      }
+    }
+  }, [user, router]);
 
   const [activeMainTab, setActiveMainTab] = useState("OPPORTUNITIES"); // "OPPORTUNITIES" | "JOBS"
   const [opportunities, setOpportunities] = useState([]);
@@ -68,6 +81,11 @@ export default function MarketplacePage() {
 
   // Fetch or refresh marketplace data
   const loadMarketplaceData = useCallback(async (isSilent = false) => {
+    if (!user || user.role !== "PARTNER") {
+      setIsLoading(false);
+      return;
+    }
+
     if (isSilent) {
       setIsRefreshing(true);
     } else {
@@ -77,19 +95,15 @@ export default function MarketplacePage() {
 
     try {
       const [oppsData, jobsData, walletData, refundsData] = await Promise.all([
-        marketplaceApi.getOpportunities(),
-        marketplaceApi.getWorkshopJobs().catch((e) => {
-          console.warn("Workshop jobs fetch failed:", e.message);
-          return [];
+        marketplaceApi.getOpportunities().catch((e) => {
+          if (e.message?.includes("No workshop partner account found")) {
+            return [];
+          }
+          throw e;
         }),
-        marketplaceApi.getWallet().catch((e) => {
-          console.warn("Wallet fetch failed:", e.message);
-          return null;
-        }),
-        marketplaceApi.getRefunds().catch((e) => {
-          console.warn("Refunds fetch failed:", e.message);
-          return [];
-        }),
+        marketplaceApi.getWorkshopJobs().catch(() => []),
+        marketplaceApi.getWallet().catch(() => null),
+        marketplaceApi.getRefunds().catch(() => []),
       ]);
 
       setOpportunities(Array.isArray(oppsData) ? oppsData : []);
@@ -103,27 +117,27 @@ export default function MarketplacePage() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     let isMounted = true;
     const fetchInitial = async () => {
+      if (!user || user.role !== "PARTNER") {
+        setIsLoading(false);
+        return;
+      }
       setError(null);
       try {
         const [oppsData, jobsData, walletData, refundsData] = await Promise.all([
-          marketplaceApi.getOpportunities(),
-          marketplaceApi.getWorkshopJobs().catch((e) => {
-            console.warn("Workshop jobs fetch failed:", e.message);
-            return [];
+          marketplaceApi.getOpportunities().catch((e) => {
+            if (e.message?.includes("No workshop partner account found")) {
+              return [];
+            }
+            throw e;
           }),
-          marketplaceApi.getWallet().catch((e) => {
-            console.warn("Wallet fetch failed:", e.message);
-            return null;
-          }),
-          marketplaceApi.getRefunds().catch((e) => {
-            console.warn("Refunds fetch failed:", e.message);
-            return [];
-          }),
+          marketplaceApi.getWorkshopJobs().catch(() => []),
+          marketplaceApi.getWallet().catch(() => null),
+          marketplaceApi.getRefunds().catch(() => []),
         ]);
         if (!isMounted) return;
         setOpportunities(Array.isArray(oppsData) ? oppsData : []);
@@ -143,7 +157,7 @@ export default function MarketplacePage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [user]);
 
   // Compute metrics from actual live backend data
   const metrics = useMemo(() => {
@@ -287,7 +301,7 @@ export default function MarketplacePage() {
   }, [jobs, jobsFilter, searchQuery]);
 
   return (
-    <ProtectedRoute allowedRoles={["PARTNER", "ADMIN"]}>
+    <>
       <div className="min-h-screen bg-slate-50/60 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
           {/* Header Section */}
@@ -714,6 +728,14 @@ export default function MarketplacePage() {
         wallet={wallet}
         onRefreshWallet={() => loadMarketplaceData(true)}
       />
+    </>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <ProtectedRoute allowedRoles={["PARTNER"]}>
+      <MarketplaceContent />
     </ProtectedRoute>
   );
 }
