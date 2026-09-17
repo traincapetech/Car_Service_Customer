@@ -62,7 +62,7 @@ const ADMIN_NAV_GROUPS = [
         label: "Workshops",
         href: "/admin/workshops",
         icon: Building2,
-        isFunctional: false,
+        isFunctional: true,
       },
       {
         id: "users-roles",
@@ -86,9 +86,9 @@ const ADMIN_NAV_GROUPS = [
       {
         id: "service-requests",
         label: "Service Requests",
-        href: "/admin/requests",
+        href: "/admin/marketplace",
         icon: ClipboardList,
-        isFunctional: false,
+        isFunctional: true,
       },
       {
         id: "bookings",
@@ -114,7 +114,7 @@ const ADMIN_NAV_GROUPS = [
         label: "Marketplace",
         href: "/admin/marketplace",
         icon: Store,
-        isFunctional: false,
+        isFunctional: true,
       },
       {
         id: "payments",
@@ -158,10 +158,10 @@ const ADMIN_NAV_GROUPS = [
       },
       {
         id: "settings",
-        label: "Settings",
-        href: "/admin/settings",
+        label: "Configuration & Rules",
+        href: "/admin/configuration",
         icon: Settings,
-        isFunctional: false,
+        isFunctional: true,
       },
     ],
   },
