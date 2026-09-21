@@ -40,6 +40,8 @@ import {
   LifeBuoy,
   ShoppingCart,
   Tag,
+  MapPin,
+  Navigation,
 } from "lucide-react";
 import {
   servicesApi,
@@ -80,6 +82,42 @@ function BookingWizardContent() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("10:00-11:00");
   const [customerNotes, setCustomerNotes] = useState("");
+
+  // Customer Location & Proximity Dispatch states
+  const [customerAddress, setCustomerAddress] = useState("Connaught Place, Central Delhi");
+  const [customerCity, setCustomerCity] = useState("New Delhi");
+  const [customerPincode, setCustomerPincode] = useState("110001");
+  const [customerLat, setCustomerLat] = useState("28.6139");
+  const [customerLng, setCustomerLng] = useState("77.2090");
+  const [isLocating, setIsLocating] = useState(false);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCustomerLat(pos.coords.latitude.toFixed(6));
+        setCustomerLng(pos.coords.longitude.toFixed(6));
+        setIsLocating(false);
+        toast.success("GPS location captured successfully!");
+      },
+      (err) => {
+        setIsLocating(false);
+        toast.error("Unable to retrieve GPS coordinates: " + err.message);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
+
+  const handleCityPreset = (cityName, lat, lng, pin) => {
+    setCustomerCity(cityName);
+    setCustomerLat(lat);
+    setCustomerLng(lng);
+    setCustomerPincode(pin);
+  };
 
   // Loading & submission states
   const [isLoading, setIsLoading] = useState(true);
@@ -354,6 +392,11 @@ function BookingWizardContent() {
         bookingDate: selectedDate,
         timeSlot: selectedSlot,
         customerNotes,
+        city: customerCity,
+        address: customerAddress,
+        pincode: customerPincode,
+        latitude: customerLat ? parseFloat(customerLat) : null,
+        longitude: customerLng ? parseFloat(customerLng) : null,
       });
 
       // Clear pending session storage
@@ -594,17 +637,23 @@ function BookingWizardContent() {
               ) : (
                 <EmptyState
                   icon={Wrench}
-                  title="No services match your search"
-                  description={`We couldn't find any services matching "${searchQuery}". Try a different keyword or reset filters.`}
+                  title={services.length === 0 ? "No services available" : "No services match your search"}
+                  description={
+                    services.length === 0
+                      ? "No service packages have been published yet. Please check back later."
+                      : `We couldn't find any services matching "${searchQuery}". Try a different keyword or reset filters.`
+                  }
                   action={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleResetFilters}
-                      leftIcon={RotateCcw}
-                    >
-                      Reset Filters
-                    </Button>
+                    services.length > 0 ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleResetFilters}
+                        leftIcon={RotateCcw}
+                      >
+                        Reset Filters
+                      </Button>
+                    ) : null
                   }
                   className="my-8"
                 />
@@ -1172,6 +1221,122 @@ function BookingWizardContent() {
             </div>
           </div>
 
+          {/* Service Location & Geographic Dispatch */}
+          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span>Service Location & Proximity Dispatch</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDetectLocation}
+                disabled={isLocating}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition-all border border-blue-200 cursor-pointer disabled:opacity-60"
+              >
+                <Navigation className={`w-3.5 h-3.5 ${isLocating ? "animate-spin" : ""}`} />
+                <span>{isLocating ? "Locating..." : "Use Current GPS"}</span>
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500">
+              Only verified workshops within your geographic service radius will receive and service your appointment.
+            </p>
+
+            {/* Quick City Presets */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-semibold text-slate-400">Popular Service Hubs:</span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: "New Delhi", lat: "28.6139", lng: "77.2090", pin: "110001" },
+                  { name: "Gurgaon", lat: "28.4595", lng: "77.0266", pin: "122001" },
+                  { name: "Noida", lat: "28.5355", lng: "77.3910", pin: "201301" },
+                  { name: "Mumbai", lat: "19.0760", lng: "72.8777", pin: "400001" },
+                  { name: "Bengaluru", lat: "12.9716", lng: "77.5946", pin: "560001" },
+                ].map((hub) => (
+                  <button
+                    key={hub.name}
+                    type="button"
+                    onClick={() => handleCityPreset(hub.name, hub.lat, hub.lng, hub.pin)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                      customerCity === hub.name
+                        ? "bg-blue-600 text-white border-blue-600 font-semibold shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-white"
+                    }`}
+                  >
+                    {hub.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Street Address / Landmark
+                </label>
+                <input
+                  type="text"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  placeholder="Street, Building, Flat / House No."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Pincode
+                </label>
+                <input
+                  type="text"
+                  value={customerPincode}
+                  onChange={(e) => setCustomerPincode(e.target.value)}
+                  placeholder="Pincode (e.g. 110001)"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-50 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={customerCity}
+                  onChange={(e) => setCustomerCity(e.target.value)}
+                  placeholder="City"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Latitude
+                </label>
+                <input
+                  type="text"
+                  value={customerLat}
+                  onChange={(e) => setCustomerLat(e.target.value)}
+                  placeholder="e.g. 28.6139"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Longitude
+                </label>
+                <input
+                  type="text"
+                  value={customerLng}
+                  onChange={(e) => setCustomerLng(e.target.value)}
+                  placeholder="e.g. 77.2090"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-50 transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Customer Special Notes */}
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
             <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
@@ -1322,6 +1487,24 @@ function BookingWizardContent() {
                     {formatSlotDisplay(selectedSlot)}
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Service Location Summary */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5 text-xs">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Service Location & Proximity Matching
+                </span>
+                <p className="font-semibold text-slate-900">
+                  {customerAddress}, {customerCity} - {customerPincode}
+                </p>
+                <p className="text-[11px] text-slate-500 font-mono">
+                  Coordinates: {customerLat || "28.6139"}, {customerLng || "77.2090"}
+                </p>
               </div>
             </div>
 

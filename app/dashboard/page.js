@@ -28,30 +28,41 @@ import {
   Gauge
 } from "lucide-react";
 import { vehiclesApi, FUEL_TYPES, TRANSMISSIONS } from "../../lib/vehicles";
-import { servicePackages } from "../../components/shared/MockData";
+import { servicesApi, getCategoryMeta, formatPrice, formatDuration } from "../../lib/services";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
+  const [services, setServices] = useState([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
 
   useEffect(() => {
     let ignore = false;
-    async function loadVehicles() {
+    async function loadDashboardData() {
       try {
-        const data = await vehiclesApi.getVehicles();
+        const [vehiclesData, servicesData] = await Promise.all([
+          vehiclesApi.getVehicles().catch((err) => {
+            console.warn("Failed to load customer vehicles on dashboard:", err);
+            return [];
+          }),
+          servicesApi.getServices().catch((err) => {
+            console.warn("Failed to load services on dashboard:", err);
+            return [];
+          }),
+        ]);
         if (!ignore) {
-          setVehicles(Array.isArray(data) ? data : []);
+          setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
+          setServices(Array.isArray(servicesData) ? servicesData : []);
         }
-      } catch (err) {
-        console.warn("Failed to load customer vehicles on dashboard:", err);
       } finally {
         if (!ignore) {
           setIsLoadingVehicles(false);
+          setIsLoadingServices(false);
         }
       }
     }
-    loadVehicles();
+    loadDashboardData();
     return () => {
       ignore = true;
     };
@@ -281,37 +292,62 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {servicePackages.slice(0, 3).map((pkg) => (
-            <Card key={pkg.id} hover className="flex flex-col justify-between">
-              <CardContent className="space-y-3 p-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                    {pkg.badge || "Popular"}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">
-                    {pkg.duration}
-                  </span>
-                </div>
-                <h4 className="text-base font-bold text-slate-900">{pkg.name}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                  {pkg.description}
-                </p>
-                <div className="pt-2">
-                  <span className="text-xs text-slate-400">Starting from</span>
-                  <p className="text-lg font-extrabold text-slate-900">₹{pkg.price.toLocaleString("en-IN")}</p>
-                </div>
-              </CardContent>
-              <div className="p-6 pt-0">
-                <Link href="/services">
-                  <Button variant="primary" size="sm" className="w-full">
-                    Select Package
-                  </Button>
-                </Link>
+        {isLoadingServices ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((idx) => (
+              <div key={idx} className="h-56 rounded-2xl bg-white border border-slate-200/80 p-6 space-y-4 animate-pulse">
+                <div className="h-4 bg-slate-200 rounded w-1/3" />
+                <div className="h-6 bg-slate-200 rounded w-3/4" />
+                <div className="h-10 bg-slate-100 rounded" />
+                <div className="h-8 bg-slate-200 rounded w-1/2 mt-4" />
               </div>
-            </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : services.length === 0 ? (
+          <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">
+            <Wrench className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="font-semibold text-slate-700">No Service Packages Available</p>
+            <p className="text-xs text-slate-400 mt-1">Check back soon as new certified maintenance packages are added.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {services.slice(0, 3).map((pkg) => {
+              const categoryMeta = getCategoryMeta(pkg.category);
+              const displayPrice = pkg.effectivePrice || pkg.finalPrice || pkg.basePrice;
+              return (
+                <Card key={pkg.id} hover className="flex flex-col justify-between">
+                  <CardContent className="space-y-3 p-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
+                        {categoryMeta.shortLabel}
+                      </span>
+                      {pkg.estimatedDurationMinutes && (
+                        <span className="text-xs text-slate-400 font-medium">
+                          {formatDuration(pkg.estimatedDurationMinutes)}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-base font-bold text-slate-900">{pkg.name}</h4>
+                    <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                      {pkg.description}
+                    </p>
+                    <div className="pt-2">
+                      <span className="text-xs text-slate-400">Starting from</span>
+                      <p className="text-lg font-extrabold text-slate-900">{formatPrice(displayPrice)}</p>
+                    </div>
+                  </CardContent>
+                  <div className="p-6 pt-0">
+                    <Link href={`/bookings/new?serviceId=${pkg.id}`}>
+                      <Button variant="primary" size="sm" className="w-full">
+                        Select Package
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </CustomerShell>
   );

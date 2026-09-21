@@ -90,58 +90,10 @@ function TrackingContent() {
         }
       } catch (err) {
         if (isMounted) {
-          console.warn("Backend unavailable, loading demo vehicle telemetry:", err?.message);
-          const fallbackJob = {
-            bookingReference: "BK-2026-9812",
-            requestReference: "SR-88410",
-            friendlyStatusTitle: "Vehicle In Active Service",
-            friendlyStatusDescription: "Your BMW 3 Series is undergoing precision synthetic oil replacement and 3D laser wheel alignment in Bay 04.",
-            currentStep: 5,
-            stageNumber: 5,
-            status: "IN_PROGRESS",
-            jobStatus: "IN_PROGRESS",
-            isCancellable: false,
-            assignedWorkshopName: "Apex Auto Care Central Delhi",
-            assignedWorkshopAddress: "Shop 14, Barakhamba Road, Connaught Place, New Delhi",
-            assignedWorkshopPhone: "+91 98110 00001",
-            vehicle: {
-              make: "BMW",
-              model: "3 Series M Sport",
-              year: 2023,
-              registrationNumber: "MH 02 FJ 8899",
-              fuelType: "PETROL",
-            },
-            service: {
-              name: "General Service Package",
-              price: 6499,
-              category: "PERIODIC_SERVICE",
-              estimatedDurationMinutes: 180,
-            },
-            advisor: {
-              name: "Rahul Sharma",
-              phone: "+91 98201 44521",
-              rating: "4.9 ★",
-              experience: "8+ Years European Auto Specialist",
-            },
-            technician: {
-              name: "Vikram Singh",
-              role: "Master BMW Certified Technician",
-              bay: "Bay 04 (Performance Lift)",
-            },
-            inspectionItems: [
-              { item: "Engine Oil Viscosity & Level", result: "Replaced with 5W-30 Synthetic", status: "pass" },
-              { item: "Oil Filter & Sump Gasket", result: "OEM Filter Installed", status: "pass" },
-              { item: "Front & Rear Brake Pads", result: "65% Life Remaining", status: "pass" },
-              { item: "Tyre Tread & 3D Alignment", result: "Laser Calibrated", status: "pass" },
-              { item: "Air & Cabin HEPA Filters", result: "Replaced Cabin Air Filter", status: "pass" },
-              { item: "ECU Fault Memory Clearing", result: "Passed Diagnostic Check", status: "pass" },
-            ],
-            estimatedCompletion: "Today, 6:30 PM",
-            estimatedDeliveryTime: "Today, 6:30 PM",
-          };
-          setSelectedJob(fallbackJob);
-          setTrackingList([fallbackJob]);
-          setError(null);
+          console.warn("Failed to load vehicle telemetry:", err?.message);
+          setError(err?.message || "Failed to load vehicle telemetry and tracking details.");
+          setSelectedJob(null);
+          setTrackingList([]);
         }
       } finally {
         if (isMounted) {

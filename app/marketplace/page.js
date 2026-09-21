@@ -23,6 +23,9 @@ import {
   MapPin,
   Activity,
   CheckCircle2,
+  ShieldAlert,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { marketplaceApi } from "../../lib/marketplace";
 import { useAuth } from "../../context/AuthContext";
@@ -60,6 +63,7 @@ function MarketplaceContent() {
   const [jobs, setJobs] = useState([]);
   const [wallet, setWallet] = useState(null);
   const [refunds, setRefunds] = useState([]);
+  const [partnerProfile, setPartnerProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -94,7 +98,7 @@ function MarketplaceContent() {
     setError(null);
 
     try {
-      const [oppsData, jobsData, walletData, refundsData] = await Promise.all([
+      const [oppsData, jobsData, walletData, refundsData, profileData] = await Promise.all([
         marketplaceApi.getOpportunities().catch((e) => {
           if (e.message?.includes("No workshop partner account found")) {
             return [];
@@ -104,12 +108,14 @@ function MarketplaceContent() {
         marketplaceApi.getWorkshopJobs().catch(() => []),
         marketplaceApi.getWallet().catch(() => null),
         marketplaceApi.getRefunds().catch(() => []),
+        marketplaceApi.getPartnerProfile().catch(() => null),
       ]);
 
       setOpportunities(Array.isArray(oppsData) ? oppsData : []);
       setJobs(Array.isArray(jobsData) ? jobsData : []);
       if (walletData) setWallet(walletData);
       if (Array.isArray(refundsData)) setRefunds(refundsData);
+      if (profileData) setPartnerProfile(profileData);
     } catch (err) {
       console.error("Failed to load marketplace data:", err);
       setError(err.message || "Failed to load service opportunities from server.");
@@ -128,7 +134,7 @@ function MarketplaceContent() {
       }
       setError(null);
       try {
-        const [oppsData, jobsData, walletData, refundsData] = await Promise.all([
+        const [oppsData, jobsData, walletData, refundsData, profileData] = await Promise.all([
           marketplaceApi.getOpportunities().catch((e) => {
             if (e.message?.includes("No workshop partner account found")) {
               return [];
@@ -138,12 +144,14 @@ function MarketplaceContent() {
           marketplaceApi.getWorkshopJobs().catch(() => []),
           marketplaceApi.getWallet().catch(() => null),
           marketplaceApi.getRefunds().catch(() => []),
+          marketplaceApi.getPartnerProfile().catch(() => null),
         ]);
         if (!isMounted) return;
         setOpportunities(Array.isArray(oppsData) ? oppsData : []);
         setJobs(Array.isArray(jobsData) ? jobsData : []);
         if (walletData) setWallet(walletData);
         if (Array.isArray(refundsData)) setRefunds(refundsData);
+        if (profileData) setPartnerProfile(profileData);
       } catch (err) {
         if (!isMounted) return;
         setError(err.message || "Failed to load service data from server.");
@@ -347,6 +355,93 @@ function MarketplaceContent() {
               </button>
             </div>
           </div>
+
+          {/* Workshop Approval & Verification Status Banner */}
+          {partnerProfile && (partnerProfile.verificationStatus !== "VERIFIED" || !partnerProfile.isActive) && (
+            <div
+              className={`p-5 rounded-2xl border text-xs space-y-2.5 transition-all ${
+                partnerProfile.verificationStatus === "PENDING"
+                  ? "bg-amber-50 border-amber-200 text-amber-900"
+                  : partnerProfile.verificationStatus === "REJECTED"
+                  ? "bg-rose-50 border-rose-200 text-rose-900"
+                  : partnerProfile.verificationStatus === "SUSPENDED"
+                  ? "bg-orange-50 border-orange-200 text-orange-900"
+                  : "bg-slate-50 border-slate-200 text-slate-800"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-[11px]">
+                  {partnerProfile.verificationStatus === "PENDING" ? (
+                    <Clock className="w-4 h-4 text-amber-600" />
+                  ) : (
+                    <ShieldAlert className="w-4 h-4 text-rose-600" />
+                  )}
+                  <span>
+                    Account Status: {partnerProfile.verificationStatus}
+                    {!partnerProfile.isActive ? " (Dispatch Inactive)" : ""}
+                  </span>
+                </div>
+                <Badge
+                  variant={
+                    partnerProfile.verificationStatus === "PENDING"
+                      ? "amber"
+                      : partnerProfile.verificationStatus === "REJECTED"
+                      ? "rose"
+                      : "neutral"
+                  }
+                  size="sm"
+                >
+                  {partnerProfile.verificationStatus}
+                </Badge>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                {partnerProfile.verificationStatus === "PENDING" && (
+                  <p className="leading-relaxed">
+                    Your workshop registration application for{" "}
+                    <strong>{partnerProfile.businessName}</strong> is currently pending administrative verification.
+                    Platform administrators review business details, facilities, and service radius before onboarding.
+                    Once approved and activated, eligible customer leads will be automatically dispatched to your dashboard.
+                  </p>
+                )}
+                {partnerProfile.verificationStatus === "REJECTED" && (
+                  <p className="leading-relaxed">
+                    Your workshop application was rejected by platform administration.
+                    {partnerProfile.rejectionReason ? (
+                      <span className="block mt-1 font-semibold">
+                        Reason: &ldquo;{partnerProfile.rejectionReason}&rdquo;
+                      </span>
+                    ) : null}
+                    Please contact platform operations for re-evaluation.
+                  </p>
+                )}
+                {partnerProfile.verificationStatus === "SUSPENDED" && (
+                  <p className="leading-relaxed">
+                    Your workshop account has been temporarily suspended from the marketplace.
+                    {partnerProfile.rejectionReason ? (
+                      <span className="block mt-1 font-semibold">
+                        Reason: &ldquo;{partnerProfile.rejectionReason}&rdquo;
+                      </span>
+                    ) : null}
+                    Active job tracking remains accessible, but lead dispatch has been paused.
+                  </p>
+                )}
+                {partnerProfile.verificationStatus === "VERIFIED" && !partnerProfile.isActive && (
+                  <p className="leading-relaxed">
+                    Your workshop is verified but currently deactivated. Please contact platform administration to activate lead dispatch.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 pt-1.5 border-t border-slate-200/60">
+                <span>City: <strong className="text-slate-700">{partnerProfile.city}</strong></span>
+                <span>•</span>
+                <span>Radius: <strong className="text-slate-700">{partnerProfile.serviceRadiusKm || 25} km</strong></span>
+                <span>•</span>
+                <span>GPS: <strong className="text-slate-700">{partnerProfile.latitude ? Number(partnerProfile.latitude).toFixed(4) : "N/A"}, {partnerProfile.longitude ? Number(partnerProfile.longitude).toFixed(4) : "N/A"}</strong></span>
+              </div>
+            </div>
+          )}
 
           {/* Workshop Details Bar */}
           {wallet && (

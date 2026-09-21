@@ -254,7 +254,7 @@ export default function RegisterPage() {
               </div>
             </form>
 
-            <div className="pt-4 border-t border-slate-100 text-center">
+            <div className="pt-4 border-t border-slate-100 text-center space-y-3">
               <p className="text-xs text-slate-500">
                 Already have an account?{" "}
                 <Link
@@ -264,6 +264,19 @@ export default function RegisterPage() {
                   Sign in instead
                 </Link>
               </p>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-left flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-slate-900">Are you a workshop / garage owner?</p>
+                  <p className="text-[11px] text-slate-500">Grow your business with verified customer leads</p>
+                </div>
+                <Link
+                  href="/register/partner"
+                  className="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shrink-0 ml-2"
+                >
+                  Partner Sign Up
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>

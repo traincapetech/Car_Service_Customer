@@ -428,6 +428,32 @@ export default function AdminWorkshop360Page() {
     }
   };
 
+  const handleApprove = async () => {
+    setIsUpdatingVerification(true);
+    try {
+      const updated = await adminApi.approveWorkshop(workshopId);
+      setWorkshop(updated);
+      showSuccess("Workshop approved and activated successfully!");
+    } catch (err) {
+      showError(err.message || "Failed to approve workshop.");
+    } finally {
+      setIsUpdatingVerification(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setIsUpdatingVerification(true);
+    try {
+      const updated = await adminApi.reactivateWorkshop(workshopId);
+      setWorkshop(updated);
+      showSuccess("Workshop reactivated and verified successfully!");
+    } catch (err) {
+      showError(err.message || "Failed to reactivate workshop.");
+    } finally {
+      setIsUpdatingVerification(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -538,7 +564,65 @@ export default function AdminWorkshop360Page() {
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            {workshop.verificationStatus === "PENDING" && (
+              <>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleApprove}
+                  disabled={isUpdatingVerification}
+                  className="text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Approve Workshop</span>
+                </Button>
+
+                <Button
+                  variant="subtleDanger"
+                  size="sm"
+                  onClick={() => {
+                    setTargetVerification("REJECTED");
+                    setVerificationReason("");
+                    setVerificationModalOpen(true);
+                  }}
+                  className="text-xs flex items-center gap-1.5"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Reject</span>
+                </Button>
+              </>
+            )}
+
+            {workshop.verificationStatus === "VERIFIED" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setTargetVerification("SUSPENDED");
+                  setVerificationReason("");
+                  setVerificationModalOpen(true);
+                }}
+                className="text-xs flex items-center gap-1.5 text-amber-700 hover:bg-amber-50"
+              >
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>Suspend</span>
+              </Button>
+            )}
+
+            {(workshop.verificationStatus === "SUSPENDED" || workshop.verificationStatus === "REJECTED") && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleReactivate}
+                disabled={isUpdatingVerification}
+                className="text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Reactivate & Verify</span>
+              </Button>
+            )}
+
             <Button
               variant={workshop.isActive ? "subtleDanger" : "outline"}
               size="sm"
@@ -550,22 +634,6 @@ export default function AdminWorkshop360Page() {
               className="text-xs"
             >
               {workshop.isActive ? "Deactivate Facility" : "Activate Facility"}
-            </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                setTargetVerification(
-                  workshop.verificationStatus === "VERIFIED" ? "SUSPENDED" : "VERIFIED"
-                );
-                setVerificationReason("");
-                setVerificationModalOpen(true);
-              }}
-              className="text-xs flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Review Verification</span>
             </Button>
           </div>
         </div>
@@ -748,12 +816,32 @@ export default function AdminWorkshop360Page() {
                         {workshop.latitude ? `${workshop.latitude}, ${workshop.longitude}` : "Not mapped"}
                       </span>
                     </div>
-                    <div className="flex justify-between py-1.5">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Service Radius</span>
                       <span className="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded text-xs">
                         {workshop.serviceRadiusKm} km
                       </span>
                     </div>
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
+                      <span className="text-slate-500">Operating Hours</span>
+                      <span className="font-semibold text-slate-800">
+                        {workshop.openingTime || "09:00"} – {workshop.closingTime || "19:00"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
+                      <span className="text-slate-500">Working Days</span>
+                      <span className="font-semibold text-slate-800">
+                        {workshop.workingDays || "Monday - Saturday"}
+                      </span>
+                    </div>
+                    {workshop.approvedAt && (
+                      <div className="flex justify-between py-1.5">
+                        <span className="text-slate-500">Approved</span>
+                        <span className="text-emerald-700 font-medium">
+                          {formatDate(workshop.approvedAt)} ({workshop.approvedBy || "Admin"})
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

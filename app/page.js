@@ -30,7 +30,49 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { servicePackages } from "../components/shared/MockData";
+
+// Featured packages showcase for unauthenticated visitors
+const FEATURED_PACKAGES = [
+  {
+    id: "pkg-general",
+    name: "General Periodic Service",
+    badge: "Most Popular",
+    duration: "3.5 Hours",
+    price: 3499,
+    description: "Complete 50-point inspection, fully synthetic engine oil replacement, filter changes, and computerized diagnostics.",
+    inclusions: [
+      "Engine synthetic oil replacement",
+      "Oil & AC cabin filter change",
+      "50-Point electronic vehicle scan",
+    ],
+  },
+  {
+    id: "pkg-ac",
+    name: "Complete AC Overhaul & Care",
+    badge: "Seasonal Special",
+    duration: "2.0 Hours",
+    price: 2499,
+    description: "Refrigerant recharge, condenser foam cleansing, cabin filter swap, and anti-bacterial duct sanitization.",
+    inclusions: [
+      "AC compressor efficiency test",
+      "Refrigerant gas refill & leak test",
+      "Cabin HEPA filter replacement",
+    ],
+  },
+  {
+    id: "pkg-brakes",
+    name: "Brake Safety & Friction Check",
+    badge: "Safety First",
+    duration: "2.5 Hours",
+    price: 1999,
+    description: "Front & rear disc brake disassembly, anti-squeal lubrication, rotor inspection, and hydraulic fluid flush.",
+    inclusions: [
+      "Front & rear disc pad cleaning",
+      "Caliper pin greasing & de-glazing",
+      "Brake fluid DOT-4 flush & bleed",
+    ],
+  },
+];
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
@@ -605,7 +647,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {servicePackages.slice(0, 3).map((pkg) => (
+          {FEATURED_PACKAGES.map((pkg) => (
             <Card key={pkg.id} hover className="flex flex-col justify-between overflow-hidden">
               <div className="p-6 sm:p-8 space-y-4">
                 <div className="flex items-center justify-between">
