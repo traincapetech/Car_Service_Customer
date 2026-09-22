@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import Badge from "../ui/Badge";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import NotificationDropdown from "../notifications/NotificationDropdown";
 
 // 15 Administrative Modules categorized logically for clean SaaS navigation
 const ADMIN_NAV_GROUPS = [
@@ -95,14 +96,14 @@ const ADMIN_NAV_GROUPS = [
         label: "Bookings",
         href: "/admin/bookings",
         icon: Calendar,
-        isFunctional: false,
+        isFunctional: true,
       },
       {
         id: "workshop-jobs",
         label: "Workshop Jobs",
-        href: "/admin/jobs",
+        href: "/admin/workshop-jobs",
         icon: Car,
-        isFunctional: false,
+        isFunctional: true,
       },
     ],
   },
@@ -168,7 +169,7 @@ const ADMIN_NAV_GROUPS = [
         label: "Reports",
         href: "/admin/reports",
         icon: BarChart3,
-        isFunctional: false,
+        isFunctional: true,
       },
     ],
   },
@@ -210,18 +211,15 @@ export default function AdminShell({ children, breadcrumbs = [] }) {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href="/admin/dashboard" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-2xs group-hover:bg-blue-600 transition-colors">
-                <Shield className="w-4 h-4 text-blue-400" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">
-                  Addior Mechanics
-                </span>
-                <span className="text-[10px] font-bold text-blue-600 tracking-wider uppercase">
-                  Admin Console
-                </span>
-              </div>
+            <Link href="/admin/dashboard" className="flex items-center gap-2 group py-0.5">
+              <img
+                src="/images/logo-transparent.png"
+                alt="Addior Mechanics"
+                className="h-8 sm:h-9 w-auto max-w-[140px] sm:max-w-[170px] object-contain transition-transform group-hover:scale-[1.02]"
+              />
+              <span className="text-[10px] font-bold text-blue-600 tracking-wider uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                Admin
+              </span>
             </Link>
 
             <span className="hidden sm:inline-flex ml-2">
@@ -256,6 +254,9 @@ export default function AdminShell({ children, breadcrumbs = [] }) {
               <span>Customer App</span>
               <ExternalLink className="w-3 h-3 text-slate-400" />
             </Link>
+
+            {/* Admin Realtime Notifications */}
+            <NotificationDropdown align="right" />
 
             {/* Admin User Chip */}
             <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">

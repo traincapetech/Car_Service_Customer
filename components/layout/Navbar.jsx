@@ -21,6 +21,7 @@ import {
 import Button from "../ui/Button";
 import Badge from "../ui/Badge";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import NotificationDropdown from "../notifications/NotificationDropdown";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -89,18 +90,12 @@ export default function Navbar() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-900 text-white shadow-2xs group-hover:bg-blue-600 transition-colors">
-              <Car className="w-5 h-5 text-white" aria-hidden="true" />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-extrabold text-slate-900 tracking-tight">
-                Addior Mechanics
-              </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/80">
-                PRO
-              </span>
-            </div>
+          <Link href="/" className="flex items-center gap-2 group py-1">
+            <img
+              src="/images/logo-transparent.png"
+              alt="Addior Mechanics"
+              className="h-10 sm:h-11 w-auto max-w-[170px] sm:max-w-[200px] object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+            />
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -129,7 +124,9 @@ export default function Navbar() {
           {/* Right Action / Profile */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <div ref={dropdownRef} className="relative">
+              <>
+                <NotificationDropdown align="right" />
+                <div ref={dropdownRef} className="relative">
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
@@ -255,7 +252,8 @@ export default function Navbar() {
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/login">
@@ -274,6 +272,7 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
+            {isAuthenticated && <NotificationDropdown align="right" />}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

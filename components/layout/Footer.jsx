@@ -9,11 +9,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Column 1: Brand */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5 text-white">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white font-bold">
-                <Car className="w-4 h-4" />
-              </div>
-              <span className="text-base font-bold tracking-tight text-white">Addior Mechanics Pro</span>
+            <div className="flex items-center gap-2">
+              <img
+                src="/images/logo-transparent.png"
+                alt="Addior Mechanics"
+                className="h-12 w-auto max-w-[200px] object-contain brightness-105"
+              />
             </div>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
               Enterprise automotive service management platform. Delivering transparent digital diagnostics, guaranteed genuine OEM parts, certified master technicians, and complete digital service histories.
