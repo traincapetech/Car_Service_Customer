@@ -14,6 +14,8 @@ export default function Button({
   className = "",
   leftIcon: LeftIcon,
   rightIcon: RightIcon,
+  icon: Icon,
+  iconPosition = "left",
   onClick,
   ...props
 }) {
@@ -45,6 +47,9 @@ export default function Button({
 
   const widthStyle = fullWidth ? "w-full" : "";
 
+  const EffectiveLeftIcon = LeftIcon || (iconPosition === "left" ? Icon : null);
+  const EffectiveRightIcon = RightIcon || (iconPosition === "right" ? Icon : null);
+
   return (
     <button
       type={type}
@@ -57,11 +62,11 @@ export default function Button({
       {isLoading ? (
         <Loader2 className="w-4 h-4 animate-spin text-current shrink-0" aria-hidden="true" />
       ) : (
-        LeftIcon && <LeftIcon className="w-4 h-4 text-current shrink-0" aria-hidden="true" />
+        EffectiveLeftIcon && <EffectiveLeftIcon className="w-4 h-4 text-current shrink-0" aria-hidden="true" />
       )}
-      <span>{children}</span>
-      {!isLoading && RightIcon && (
-        <RightIcon className="w-4 h-4 text-current shrink-0" aria-hidden="true" />
+      {children && <span>{children}</span>}
+      {!isLoading && EffectiveRightIcon && (
+        <EffectiveRightIcon className="w-4 h-4 text-current shrink-0" aria-hidden="true" />
       )}
     </button>
   );

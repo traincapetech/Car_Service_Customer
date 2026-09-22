@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import AdminShell from "../../../components/admin/AdminShell";
 import { adminAuditApi } from "../../../lib/admin";
 import {
   History,
@@ -192,8 +191,7 @@ export default function AdminAuditPage() {
   ];
 
   return (
-    <AdminShell breadcrumbs={breadcrumbs}>
-      <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12">
         {/* Header Ribbon */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2.5">
@@ -572,7 +570,6 @@ export default function AdminAuditPage() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Audit Event Detail & State Diff Modal */}
       <Modal
@@ -746,6 +743,6 @@ export default function AdminAuditPage() {
           </div>
         ) : null}
       </Modal>
-    </AdminShell>
+    </div>
   );
 }

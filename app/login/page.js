@@ -103,13 +103,12 @@ function LoginFormContent() {
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-1 group">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-2xs group-hover:bg-blue-600 transition-colors">
-              <Car className="w-5 h-5 text-white" aria-hidden="true" />
-            </div>
-            <span className="text-xl font-extrabold text-slate-900 tracking-tight">
-              Addior Mechanics <span className="text-blue-600">PRO</span>
-            </span>
+          <Link href="/" className="inline-flex items-center justify-center mb-1 group">
+            <img
+              src="/images/logo-transparent.png"
+              alt="Addior Mechanics"
+              className="h-14 sm:h-16 w-auto max-w-[240px] object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+            />
           </Link>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Sign in to your account

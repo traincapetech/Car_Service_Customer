@@ -6,6 +6,7 @@ export default function Badge({
   size = "md",
   dot = false,
   pulse = false,
+  icon: Icon,
   className = "",
 }) {
   const variants = {
@@ -56,6 +57,7 @@ export default function Badge({
           />
         </span>
       )}
+      {Icon && <Icon className="w-3 h-3 shrink-0" aria-hidden="true" />}
       <span>{children}</span>
     </span>
   );

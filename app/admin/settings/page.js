@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import AdminShell from "../../../components/admin/AdminShell";
 import { adminSystemApi } from "../../../lib/admin";
 import {
   Activity,
@@ -93,8 +92,7 @@ export default function AdminSettingsPage() {
   ];
 
   return (
-    <AdminShell breadcrumbs={breadcrumbs}>
-      <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12">
         {/* Header Ribbon */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -519,6 +517,5 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
-    </AdminShell>
   );
 }

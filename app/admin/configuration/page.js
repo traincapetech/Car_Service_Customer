@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
-import AdminShell from "../../../components/admin/AdminShell";
 import { adminConfigurationApi } from "../../../lib/adminConfiguration";
 import { useToast } from "../../../context/ToastContext";
 import Badge from "../../../components/ui/Badge";
@@ -338,13 +337,7 @@ function AdminConfigurationContent() {
   };
 
   return (
-    <AdminShell
-      breadcrumbs={[
-        { label: "Dashboard", href: "/admin/dashboard" },
-        { label: "Configuration & Rules", href: "/admin/configuration" },
-      ]}
-    >
-      <div className="space-y-6 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -1016,7 +1009,6 @@ function AdminConfigurationContent() {
           </div>
         </Modal>
       </div>
-    </AdminShell>
   );
 }
 
