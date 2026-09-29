@@ -13,6 +13,7 @@ import ServiceDetailModal from "../../components/services/ServiceDetailModal";
 import ServiceSkeletonGrid from "../../components/services/ServiceSkeleton";
 import { servicesApi, getCategoryMeta } from "../../lib/services";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
 import {
   Wrench,
   Search,
@@ -27,6 +28,7 @@ import {
 export default function ServicesPage() {
   const router = useRouter();
   const toast = useToast();
+  const { isAuthenticated } = useAuth();
 
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -173,6 +175,13 @@ export default function ServicesPage() {
     // Close detail modal if open
     setDetailModalService(null);
 
+    // If not logged in, prompt user and redirect to login/register with return destination
+    if (!isAuthenticated) {
+      toast.info("Please sign in or create an account to book your service.");
+      router.push(`/login?redirect=${encodeURIComponent(`/bookings/new?serviceId=${service.id}`)}`);
+      return;
+    }
+
     // Route to booking wizard with pre-selected service
     router.push(`/bookings/new?serviceId=${service.id}`);
   };
@@ -184,7 +193,7 @@ export default function ServicesPage() {
   };
 
   return (
-    <CustomerShell>
+    <CustomerShell requireAuth={false}>
       {/* PAGE HEADER */}
       <PageHeader
         title="Service Catalog"
@@ -198,7 +207,7 @@ export default function ServicesPage() {
           )
         }
         breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
+          { label: isAuthenticated ? "Dashboard" : "Home", href: isAuthenticated ? "/dashboard" : "/" },
           { label: "Service Catalog" },
         ]}
       />

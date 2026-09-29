@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import {
@@ -17,8 +17,11 @@ import Alert from "../../components/ui/Alert";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Car, User, Mail, Phone, ShieldCheck, CheckCircle2 } from "lucide-react";
 
-export default function RegisterPage() {
+function RegisterFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
+
   const { register } = useAuth();
   const toast = useToast();
 
@@ -92,7 +95,7 @@ export default function RegisterPage() {
       });
 
       toast.success("Account registered successfully! Welcome to Addior Mechanics Pro.");
-      router.push("/dashboard");
+      router.push(redirectPath);
     } catch (err) {
       // If backend validation returns field-specific errors
       if (err.fieldErrors && typeof err.fieldErrors === "object") {
@@ -257,7 +260,7 @@ export default function RegisterPage() {
               <p className="text-xs text-slate-500">
                 Already have an account?{" "}
                 <Link
-                  href="/login"
+                  href={redirectPath && redirectPath !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirectPath)}` : "/login"}
                   className="font-bold text-slate-900 hover:text-blue-600 transition-colors underline-offset-4 hover:underline"
                 >
                   Sign in instead
@@ -307,5 +310,19 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50">
+          <div className="w-8 h-8 rounded-full border-2 border-slate-300 border-t-slate-900 animate-spin" />
+        </div>
+      }
+    >
+      <RegisterFormContent />
+    </Suspense>
   );
 }

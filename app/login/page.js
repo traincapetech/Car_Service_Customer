@@ -186,7 +186,7 @@ function LoginFormContent() {
               <p className="text-xs text-slate-500">
                 Don&apos;t have an account yet?{" "}
                 <Link
-                  href="/register"
+                  href={redirectPath && redirectPath !== "/dashboard" ? `/register?redirect=${encodeURIComponent(redirectPath)}` : "/register"}
                   className="font-bold text-slate-900 hover:text-blue-600 transition-colors underline-offset-4 hover:underline"
                 >
                   Create an account
