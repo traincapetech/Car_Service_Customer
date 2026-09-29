@@ -1,8 +1,17 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Car, ShieldCheck, PhoneCall, Clock, MapPin } from "lucide-react";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Do not render marketing footer inside admin workstation
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
   return (
     <footer className="bg-slate-900 text-slate-400 text-xs border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

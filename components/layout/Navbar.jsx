@@ -62,25 +62,26 @@ export default function Navbar() {
   const isPartner = isAuthenticated && user?.role === "PARTNER";
   const isAdmin = isAuthenticated && user?.role === "ADMIN";
 
+  // Suppress public customer navbar on administrative console routes (/admin/*)
+  // The AdminShell provides its own dedicated, full-width administrative workstation header
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
-    ...(isPartner
-      ? [{ label: "Marketplace", href: "/marketplace" }]
-      : []),
-    ...(isAdmin
-      ? [
-        { label: "Admin Console", href: "/admin/dashboard" },
-        { label: "Marketplace Center", href: "/admin/marketplace" },
-        { label: "Rules & Config", href: "/admin/configuration" },
-      ]
-      : []),
     ...(isAuthenticated && !isAdmin
       ? [
         { label: "Dashboard", href: "/dashboard" },
         { label: "My Garage", href: "/garage" },
         { label: "Live Tracking", href: "/tracking" },
         { label: "History", href: "/history" },
+      ]
+      : []),
+    ...(isAuthenticated && isAdmin
+      ? [
+        { label: "Customer Dashboard", href: "/dashboard" },
       ]
       : []),
   ];
@@ -123,6 +124,26 @@ export default function Navbar() {
 
           {/* Right Action / Profile */}
           <div className="hidden md:flex items-center gap-3">
+            {isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-xs border border-slate-700"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                <span>Admin Console</span>
+              </Link>
+            )}
+
+            {isPartner && (
+              <Link
+                href="/marketplace"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold hover:bg-blue-100 transition-all border border-blue-200"
+              >
+                <Store className="w-3.5 h-3.5 text-blue-600" />
+                <span>Workshop Portal</span>
+              </Link>
+            )}
+
             {isAuthenticated ? (
               <>
                 <NotificationDropdown align="right" />
