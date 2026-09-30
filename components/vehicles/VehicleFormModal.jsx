@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Modal from "../ui/Modal";
 import Input from "../ui/Input";
 import FormField from "../ui/FormField";
 import Button from "../ui/Button";
 import Alert from "../ui/Alert";
-import { Plus, Check, Search, Car } from "lucide-react";
+import { Plus, Check, Search, Car, AlertCircle, CheckCircle2 } from "lucide-react";
 import {
   FUEL_TYPES,
   TRANSMISSIONS,
   validateVehicleForm,
   vehiclesApi,
+  validateIndianRegistrationNumber,
+  formatRegistrationNumber,
 } from "../../lib/vehicles";
 import { vehicleCatalogApi } from "../../lib/vehicleCatalog";
 import { ApiError } from "../../lib/api";
@@ -23,7 +25,7 @@ function VehicleForm({ vehicle, onClose, onSuccess }) {
     make: vehicle?.make || "",
     model: vehicle?.model || "",
     year: vehicle?.year ? vehicle.year.toString() : new Date().getFullYear().toString(),
-    registrationNumber: vehicle?.registrationNumber || "",
+    registrationNumber: vehicle?.registrationNumber ? formatRegistrationNumber(vehicle.registrationNumber) : "",
     fuelType: vehicle?.fuelType || "PETROL",
     transmission: vehicle?.transmission || "MANUAL",
   }));
@@ -108,6 +110,54 @@ function VehicleForm({ vehicle, onClose, onSuccess }) {
     }
     setIsCustomModel(false);
     handleChange("model", modelNameValue);
+  };
+
+  const regValidation = useMemo(() => {
+    if (!formData.registrationNumber) return null;
+    return validateIndianRegistrationNumber(formData.registrationNumber);
+  }, [formData.registrationNumber]);
+
+  const handleRegistrationChange = (e) => {
+    const raw = e.target.value;
+    const formatted = formatRegistrationNumber(raw);
+    setFormData((prev) => ({ ...prev, registrationNumber: formatted }));
+
+    if (errors.registrationNumber) {
+      if (!formatted) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.registrationNumber;
+          return next;
+        });
+      } else {
+        const check = validateIndianRegistrationNumber(formatted);
+        if (check.isValid) {
+          setErrors((prev) => {
+            const next = { ...prev };
+            delete next.registrationNumber;
+            return next;
+          });
+        }
+      }
+    }
+    if (generalError) {
+      setGeneralError("");
+    }
+  };
+
+  const handleRegistrationBlur = () => {
+    if (!formData.registrationNumber) return;
+    const check = validateIndianRegistrationNumber(formData.registrationNumber);
+    if (!check.isValid) {
+      setErrors((prev) => ({ ...prev, registrationNumber: check.error }));
+    } else {
+      setFormData((prev) => ({ ...prev, registrationNumber: check.formatted }));
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.registrationNumber;
+        return next;
+      });
+    }
   };
 
   const handleChange = (field, value) => {
@@ -303,17 +353,71 @@ function VehicleForm({ vehicle, onClose, onSuccess }) {
           disabled={isSubmitting}
         />
 
-        <Input
-          id="vehicle-reg-number"
-          label="Registration Number"
-          placeholder="e.g., MH 02 AB 1234"
-          value={formData.registrationNumber}
-          onChange={(e) => handleChange("registrationNumber", e.target.value.toUpperCase())}
-          error={errors.registrationNumber}
-          required
-          disabled={isSubmitting}
-          inputClassName="font-mono uppercase tracking-wider"
-        />
+        <div>
+          <FormField
+            label="Registration Number"
+            id="vehicle-reg-number"
+            required
+            error={errors.registrationNumber}
+          >
+            <div className="relative flex items-center">
+              {/* Indian HSRP Blue IND Badge */}
+              <div
+                className="absolute left-1.5 z-10 flex items-center gap-1 bg-blue-700 text-white px-2 py-1.5 rounded-lg select-none shadow-2xs"
+                title="Indian High Security Registration Plate"
+              >
+                <span className="text-[10px] font-black tracking-widest leading-none font-mono">
+                  IND
+                </span>
+              </div>
+
+              <input
+                id="vehicle-reg-number"
+                type="text"
+                placeholder="MH 02 AB 1234"
+                maxLength={13}
+                value={formData.registrationNumber}
+                onChange={handleRegistrationChange}
+                onBlur={handleRegistrationBlur}
+                disabled={isSubmitting}
+                required
+                className={`w-full rounded-xl bg-white border text-sm font-mono font-bold tracking-wider uppercase transition-all duration-150 py-2.5 pl-14 pr-10 shadow-2xs ${
+                  errors.registrationNumber
+                    ? "border-rose-400 text-rose-950 focus:border-rose-600 focus:ring-2 focus:ring-rose-100 bg-rose-50/15"
+                    : regValidation?.isValid
+                    ? "border-emerald-500 text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                    : "border-slate-300 hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-slate-900"
+                } disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed`}
+              />
+
+              {/* Status Indicator Icon */}
+              <div className="absolute right-3 pointer-events-none flex items-center">
+                {regValidation?.isValid ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 animate-in zoom-in-75 duration-150" />
+                ) : errors.registrationNumber ? (
+                  <AlertCircle className="w-5 h-5 text-rose-500" />
+                ) : null}
+              </div>
+            </div>
+          </FormField>
+
+          {/* Validation Feedback & Helper */}
+          {regValidation?.isValid ? (
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1">
+              <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>
+                Verified RTO Plate:{" "}
+                <strong className="font-bold">{regValidation.stateName}</strong> (
+                {regValidation.formatted})
+              </span>
+            </div>
+          ) : !errors.registrationNumber ? (
+            <p className="mt-1 text-[11px] text-slate-500">
+              Format: <span className="font-mono font-semibold text-slate-700">MH 02 AB 1234</span> or{" "}
+              <span className="font-mono font-semibold text-slate-700">22 BH 1234 AA</span>
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {/* FUEL TYPE & TRANSMISSION */}
