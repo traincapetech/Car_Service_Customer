@@ -767,7 +767,7 @@ export default function HomePage() {
             </Link>
             {!isAuthenticated && (
               <Link href="/register">
-                <Button variant="outline" size="lg" className="bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white">
+                <Button variant="outline" size="lg" className="bg-transparent text-black border-white/20 hover:bg-white/10 hover:text-white">
                   Create Account
                 </Button>
               </Link>
