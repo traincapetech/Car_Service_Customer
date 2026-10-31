@@ -306,7 +306,7 @@ function VehicleForm({ vehicle, onClose, onSuccess }) {
                   {m.name} {m.bodyType ? `(${m.bodyType})` : ""}
                 </option>
               ))}
-              <option value="__custom__">Other Model (Type manually)...</option>
+              <option value="__custom__">Other Model (Type manually)....</option>
             </select>
           </FormField>
         ) : (
